@@ -1,0 +1,30 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="utf-8"/><title>Complaint details</title></head>
+<body>
+<!-- show flash messages -->
+<p th:if="${message != null}" th:text="${message}"></p>
+<p th:if="${error != null}" th:text="${error}" style="color:red"></p>
+
+<a th:href="@{/vendor/complaints}">&larr; Back to list</a>
+
+<h2>Complaint #<span th:text="${complaint != null ? complaint.id : '-'}">#</span></h2>
+
+<!-- rest unchanged, with null checks -->
+<p><label>Category:</label> <span th:text="${complaint != null && complaint.category != null ? complaint.category : '-'}">cat</span></p>
+<!-- ... other fields ... -->
+
+<!-- actions -->
+<form th:if="${complaint != null}" th:action="@{|/vendor/complaints/${complaint.id}/accept|}" method="post" style="display:inline">
+    <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+    <button type="submit">Accept</button>
+</form>
+
+<form th:if="${complaint != null}" th:action="@{|/vendor/complaints/${complaint.id}/complete|}" method="post" style="display:inline; margin-left:8px;">
+    <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+    <input name="notes" placeholder="notes" />
+    <button type="submit">Complete</button>
+</form>
+
+</body>
+</html>

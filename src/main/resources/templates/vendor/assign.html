@@ -1,0 +1,57 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <title>Vendor Dashboard</title>
+    <style> body { font-family: system-ui, Arial; padding: 20px; } </style>
+</head>
+<body>
+
+<h1>Vendor dashboard</h1>
+
+<p>Welcome, <strong th:text="${vendor != null ? vendor.name : 'Vendor'}">Vendor</strong></p>
+
+<div>
+    <strong>Your assigned complaints:</strong>
+    <span th:text="${complaints != null ? complaints.size() : 0}">0</span>
+    <a th:href="@{/vendor/logout}" style="margin-left:20px;">Logout</a>
+</div>
+
+<hr/>
+
+<div th:if="${complaints != null and complaints.size() > 0}">
+    <h2>Recent assigned complaints</h2>
+    <ul>
+        <li th:each="c : ${complaints}">
+            <div><strong th:text="${c.category}">CATEGORY</strong> — <span th:text="${c.description}">desc</span></div>
+            <div>
+                <small th:text="${c.location}">location</small>
+                &nbsp;•&nbsp;
+                <small th:text="${#temporals.format(c.createdAt, 'yyyy-MM-dd HH:mm')}">date</small>
+            </div>
+
+            <!-- vendor actions (POST forms) -->
+            <div style="margin-top:6px;">
+                <form th:action="@{|/vendor/complaints/${c.id}/accept|}" method="post" th:if="${c.status == 'IN_PROGRESS' or c.status == 'SUBMITTED'}" style="display:inline">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" th:if="${_csrf != null}"/>
+                    <button type="submit">Accept</button>
+                </form>
+
+                <form th:action="@{|/vendor/complaints/${c.id}/complete|}" method="post" style="display:inline; margin-left:8px;">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" th:if="${_csrf != null}"/>
+                    <input name="notes" placeholder="notes" />
+                    <button type="submit">Complete</button>
+                </form>
+            </div>
+
+            <hr/>
+        </li>
+    </ul>
+</div>
+
+<div th:if="${complaints == null or complaints.size() == 0}">
+    <p>No complaints assigned to you yet.</p>
+</div>
+
+</body>
+</html>

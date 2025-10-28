@@ -1,0 +1,110 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Complaint Details</title>
+    <style>
+        body { font-family: sans-serif; margin: 40px; }
+        label { font-weight: bold; }
+        textarea { width: 100%; min-height: 80px; }
+        form { margin-bottom: 20px; display:inline-block; margin-right:8px; }
+        a.button, button {
+            display: inline-block; background: #2b7; color: white;
+            text-decoration: none; padding: 6px 10px; border-radius: 4px;
+            border: none; cursor: pointer;
+        }
+        .danger { background: #d33; }
+        .neutral { background: #888; }
+    </style>
+</head>
+<body>
+<a class="button neutral" th:href="@{/admin/complaints}">&larr; Back to list</a>
+
+<h2>Complaint #<span th:text="${complaint != null ? complaint.id : '-'}">1</span></h2>
+
+<p><label>User:</label>
+    <span th:text="${complaint != null and complaint.user != null and complaint.user.username != null ? complaint.user.username : '-'}">username</span>
+</p>
+
+<p><label>Category:</label>
+    <span th:text="${complaint != null && complaint.category != null ? complaint.category : '-'}">category</span>
+</p>
+
+<p><label>Status:</label>
+    <span th:text="${complaint != null && complaint.status != null ? complaint.status : '-'}">status</span>
+</p>
+
+<p><label>Description:</label>
+    <span th:text="${complaint != null && complaint.description != null ? complaint.description : '-'}">desc</span>
+</p>
+
+<p><label>Location:</label>
+    <span th:text="${complaint != null && complaint.location != null ? complaint.location : '-'}">loc</span>
+</p>
+
+<p><label>Created:</label>
+    <span th:text="${complaint != null && complaint.createdAt != null ? #temporals.format(complaint.createdAt, 'yyyy-MM-dd HH:mm') : '-'}">date</span>
+</p>
+
+<div th:if="${complaint != null and complaint.photo != null and !#strings.isEmpty(complaint.photo)}">
+    <p><label>Photo:</label></p>
+    <!-- use th:src without @{} so plain absolute/relative URLs are ok -->
+    <img th:src="${complaint.photo}" alt="Photo" style="max-width:300px; border:1px solid #ccc;">
+</div>
+<!--<div style="margin-top:12px;"> -->
+    <!-- Show Assign link only when complaint is not assigned and is SUBMITTED -->
+    <!-- show Assign link only when complaint exists, not assigned, and status == ComplaintStatus.SUBMITTED -->
+
+</div>
+
+<hr>
+<!-- Add somewhere near the top actions in complaint_view.html -->
+
+<!-- Actions area (replace the existing action block with this) -->
+<hr/>
+
+<div style="margin-top:12px;">
+    <!-- Show Assign link only when complaint exists, not assigned, and status == enum SUBMITTED -->
+    <a th:if="${complaint != null and complaint.assignedVendorId == null and complaint.status == T(com.demo.demo.model.ComplaintStatus).SUBMITTED}"
+       th:href="@{|/admin/complaints/${complaint.id}/assign|}"
+       class="button" style="margin-right:8px;">Assign</a>
+
+    <!-- Mark In Progress -->
+    <form th:action="@{|/admin/complaints/${complaint.id}/inprogress|}" method="post" th:if="${complaint != null}">
+        <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <button type="submit">Mark In Progress</button>
+    </form>
+
+    <!-- Mark Completed -->
+    <form th:action="@{|/admin/complaints/${complaint.id}/complete|}" method="post" th:if="${complaint != null}">
+        <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <button type="submit">Mark Completed</button>
+    </form>
+
+    <!-- Reject -->
+    <form th:action="@{|/admin/complaints/${complaint.id}/reject|}" method="post" th:if="${complaint != null}">
+        <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <button type="submit" class="danger">Reject</button>
+    </form>
+
+    <!-- Verify & Close (shown when vendor marked completed and admin must verify) -->
+    <form th:if="${complaint != null and complaint.status == T(com.demo.demo.model.ComplaintStatus).AWAITING_VERIFICATION}"
+          th:action="@{|/admin/complaints/${complaint.id}/verify|}" method="post" style="display:inline-block;">
+        <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <button type="submit" style="margin-left:8px;">Verify & Close</button>
+    </form>
+</div>
+</div>
+
+<hr/>
+<p><strong>Admin Notes:</strong></p>
+<p th:text="${complaint != null && complaint.adminNotes != null ? complaint.adminNotes : 'None'}">none</p>
+<!-- inside complaint_view.html -->
+<form th:if="${complaint.status == 'AWAITING_VERIFICATION'}"
+      th:action="@{|/admin/complaints/${complaint.id}/verify|}" method="post">
+    <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+    <button type="submit">Verify & Close</button>
+</form>
+</body>
+</html>
+

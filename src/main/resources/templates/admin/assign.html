@@ -1,0 +1,40 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8" />
+    <title>Assign Vendor</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin:24px; }
+        .btn { padding:8px 12px; background:#0366d6; color:white; text-decoration:none; border-radius:4px; }
+    </style>
+</head>
+<body>
+<h2>Assign vendor for complaint <span th:text="${complaint.id}">#</span></h2>
+
+<p>
+    <strong>User:</strong> <span th:text="${complaint.user != null ? complaint.user.username : '-'}">user</span><br/>
+    <strong>Category:</strong> <span th:text="${complaint.category}">category</span><br/>
+    <strong>Description:</strong> <span th:text="${complaint.description}">desc</span><br/>
+</p>
+
+<form th:action="@{|/admin/complaints/${complaint.id}/assign|}" method="post">
+    <!-- render CSRF only if it's available in model -->
+    <input type="hidden" th:if="${_csrf != null}"
+           th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+    <label for="vendor">Select vendor</label>
+    <select name="vendorId" id="vendor">
+        <option value="" disabled selected>-- choose --</option>
+        <option th:each="v : ${vendors}"
+                th:value="${v.id}"
+                th:text="${v.name}">Vendor A</option>
+    </select>
+
+    <div style="margin-top:16px;">
+        <button type="submit" class="btn">Assign</button>
+        <a th:href="@{/admin/complaints}" style="margin-left:12px;">Cancel</a>
+    </div>
+</form>
+
+</body>
+</html>

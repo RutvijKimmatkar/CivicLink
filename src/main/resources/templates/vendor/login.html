@@ -1,0 +1,19 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>Vendor Login</title>
+</head>
+<body>
+<h2>Vendor login (dev)</h2>
+
+<p th:if="${error}" th:text="${error}" style="color:red"></p>
+
+<form th:action="@{/vendor/login}" method="post">
+    <label>Vendor ID</label><br/>
+    <input name="vendorId" type="number" required />
+    <br/><br/>
+    <button type="submit">Login</button>
+</form>
+</body>
+</html>

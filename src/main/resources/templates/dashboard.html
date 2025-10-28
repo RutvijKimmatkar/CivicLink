@@ -1,0 +1,44 @@
+
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>Dashboard</title>
+</head>
+<body>
+<h2>Welcome, <span th:text="${name}">User</span>!</h2>
+
+<div>
+    <strong>Your complaints:</strong>
+    <span th:text="${complaintCount}">0</span>
+
+    <a th:href="@{/complaints/new}" style="margin-left:20px; padding:8px 12px; background:#2b7; color:white; text-decoration:none; border-radius:4px;">
+        + New Complaint
+    </a>
+</div>
+
+<hr/>
+
+<div th:if="${complaints != null and !complaints.isEmpty()}">
+    <h3>Your recent complaints</h3>
+    <ul>
+        <li th:each="c : ${complaints}">
+            <strong th:text="${c.category}">CATEGORY</strong> —
+            <span th:text="${c.description}">Description</span>
+            <br/>
+            <small th:text="${c.location}">location</small> •
+            <small th:if="${c.createdAt != null}"
+                   th:text="${#temporals.format(c.createdAt, 'yyyy-MM-dd HH:mm')}">date</small>
+            <small th:if="${c.createdAt == null}">unknown date</small>
+        </li>
+    </ul>
+</div>
+
+<div th:if="${complaints == null or complaints.isEmpty()}">
+    <p>No complaints yet. Click <a th:href="@{/complaints/new}">here</a> to create your first one.</p>
+</div>
+
+<p><a th:href="@{/logout}">Logout</a></p>
+</body>
+</html>
+

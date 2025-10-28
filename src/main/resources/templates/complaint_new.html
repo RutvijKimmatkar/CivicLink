@@ -1,0 +1,35 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>New Complaint</title>
+</head>
+<body>
+<h2>Create a complaint</h2>
+
+<p th:if="${error}" th:text="${error}" style="color:red"></p>
+
+<form th:action="@{/complaints}" method="post">
+    <label>Category:</label>
+    <select name="category" required>
+        <option th:each="c : ${categories}" th:value="${c}" th:text="${c}"></option>
+    </select>
+
+    <label>Description:</label>
+    <textarea name="description" required></textarea>
+
+    <label>Location:</label>
+    <input type="text" name="location" required />
+
+    <label>Location details (optional):</label>
+    <input type="text" name="locationDescription" />
+
+    <label>Photo URL (optional):</label>
+    <input type="text" name="photo" />
+
+    <button type="submit">Submit Complaint</button>
+</form>
+
+<p><a th:href="@{/dashboard}">Back to Dashboard</a></p>
+</body>
+</html>

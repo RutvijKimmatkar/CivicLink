@@ -1,0 +1,38 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>Vendor Dashboard</title>
+    <style>
+        body { font-family: system-ui, Arial; padding: 20px; }
+        button { margin-left:8px; }
+    </style>
+</head>
+<body>
+<h2>Welcome, <span th:text="${vendorName != null ? vendorName : (vendor != null ? vendor.name : 'Vendor')}">Vendor</span></h2>
+<p><a th:href="@{/vendor/logout}">Logout</a></p>
+
+<h3>Assigned complaints</h3>
+
+<div th:if="${complaints != null and !complaints.isEmpty()}">
+    <ul>
+        <li th:each="c : ${complaints}">
+            <strong th:text="${c.id}">1</strong> —
+            <span th:text="${c.category != null ? c.category : '-'}">CAT</span> —
+            <span th:text="${c.description == null ? ''
+                 : (c.description.length() > 120
+                     ? c.description.substring(0,120).concat('...')
+                     : c.description)}">desc</span>
+            <br/>
+            <small th:text="${c.createdAt != null ? #temporals.format(c.createdAt,'yyyy-MM-dd HH:mm') : '-'}">date</small>
+            <br/>
+            <a th:href="@{|/vendor/complaints/${c.id}|}">View</a>
+        </li>
+    </ul>
+</div>
+
+<div th:if="${complaints == null or complaints.isEmpty()}">
+    <p>No complaints assigned.</p>
+</div>
+</body>
+</html>

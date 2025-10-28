@@ -1,0 +1,100 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8" />
+    <title>Admin — Complaints</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin:24px; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { text-align:left; padding:8px; border-bottom: 1px solid #eee; }
+        th { background:#f4f4f4; }
+        .status { padding:4px 8px; border-radius:4px; font-weight:600; }
+        .SUBMITTED { background:#ffd; }
+        .IN_PROGRESS { background:#cfe; }
+        .REJECTED { background:#fdd; }
+        .COMPLETED { background:#ddf; }
+        .actions a, .actions button { margin-right:8px; text-decoration:none; color:#0366d6; background:none; border:none; cursor:pointer; padding:0; }
+        form.inline { display:inline; margin:0; padding:0; }
+    </style>
+</head>
+<body>
+
+<h2>Admin — Complaints</h2>
+
+<p th:if="${adminName != null}">Signed in as: <strong th:text="${adminName}">Admin</strong>
+    &nbsp;|&nbsp;<a th:href="@{/admin/logout}">Logout</a></p>
+
+<!-- safe check for list presence: avoid calling helper functions that may not exist -->
+<div th:if="${complaints != null and complaints.size() > 0}">
+    <table>
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>User</th>
+            <th>Category</th>
+            <th>Description</th>
+            <th>Location</th>
+            <th>Created</th>
+            <th>Status</th>
+            <th>Vendor</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="c, iterStat : ${complaints}">
+            <td th:text="${iterStat.index + 1}">1</td>
+
+            <!-- null-safe user display -->
+            <td th:text="${c.user != null ? (c.user.username != null ? c.user.username : c.user.email) : '—'}">user</td>
+
+            <td th:text="${c.category != null ? c.category : '-'}">CATEGORY</td>
+            <td th:text="${c.description != null ? c.description : '-'}">desc</td>
+            <td th:text="${c.location != null ? c.location : '-'}">loc</td>
+
+            <!-- use #temporals if available; fall back safely -->
+            <td th:text="${c.createdAt != null ? #temporals.format(c.createdAt, 'yyyy-MM-dd HH:mm') : '-'}">date</td>
+
+            <td>
+                <span th:text="${c.status != null ? c.status : 'UNKNOWN'}"
+                      th:class="'status ' + (c.status != null ? c.status : '')">STATUS</span>
+            </td>
+
+            <td th:text="${c.assignedVendorId != null ? c.assignedVendorId : '-'}">vendor</td>
+
+            <td class="actions">
+                <!-- View (GET) -->
+                <a th:href="@{|/admin/complaints/${c.id}|}">View</a>
+
+                <!-- Assign (GET to show assign form) -->
+                <a th:href="@{|/admin/complaints/${c.id}/assign|}">Assign</a>
+
+                <!-- Reject (POST) -->
+                <form th:action="@{|/admin/complaints/${c.id}/reject|}" method="post" class="inline">
+                    <!-- include CSRF only if available -->
+                    <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <button type="submit">Reject</button>
+                </form>
+
+                <!-- In Progress (POST) -->
+                <form th:action="@{|/admin/complaints/${c.id}/inprogress|}" method="post" class="inline">
+                    <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <button type="submit">Approve / In Progress</button>
+                </form>
+
+                <!-- Complete (POST) -->
+                <form th:action="@{|/admin/complaints/${c.id}/complete|}" method="post" class="inline">
+                    <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <button type="submit">Complete</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<div th:if="${complaints == null or complaints.size() == 0}">
+    <p>No complaints found.</p>
+</div>
+
+</body>
+</html>
