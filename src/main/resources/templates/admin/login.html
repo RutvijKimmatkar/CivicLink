@@ -1,36 +1,94 @@
-<!doctype html>
-<html xmlns:th="http://www.thymeleaf.org">
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="utf-8">
-    <title>Admin Login</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Login - CIVILINK</title>
+    <!-- Include Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { font-family: sans-serif; margin: 40px; }
-        .card { max-width: 420px; padding: 18px; border: 1px solid #ddd; border-radius: 8px; }
-        input { width: 100%; padding: 8px; margin: 6px 0; box-sizing: border-box; }
-        button { padding: 8px 12px; background:#2b7; color:white; border:none; border-radius:4px; cursor:pointer; }
-        .error { color: #b00; margin-bottom: 8px; }
+        /* Apply a default font, like Inter */
+        body {
+            font-family: "Inter", sans-serif;
+        }
+        /* Tailwind custom class for styled inputs */
+        @layer components {
+            .form-input {
+                @apply mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-slate-500 focus:border-slate-500 sm:text-sm;
+            }
+        }
     </style>
 </head>
-<body>
-<div class="card">
-    <h2>Admin login (dev)</h2>
+<body class="min-h-screen bg-slate-50 text-slate-900 antialiased bg-[image:radial-gradient(theme(colors.slate.200)_1px,transparent_1px)] [background-size:16px_16px]">
 
-    <p th:if="${error}" th:text="${error}" class="error"></p>
+<!-- Admin Login Content -->
+<main class="flex min-h-screen items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="w-full max-w-md space-y-8">
+        <!-- Card -->
+        <div class="relative w-full p-6 sm:p-8 bg-white rounded-lg shadow-xl">
+            <!-- Logo -->
+            <div class="flex justify-center mb-6">
+                <!-- CHANGED: Switched href to th:href -->
+                <a th:href="@{/login}" class="flex items-center gap-2">
+                    <img
+                            src="/civiclink.png"
+                            alt="CIVILINK Logo"
+                            class="h-8 w-auto"
+                    />
+                </a>
+            </div>
 
-    <form th:action="@{/admin/login}" method="post">
-        <label>Username</label>
-        <input name="username" required />
-        <label>Password</label>
-        <input name="password" type="password" required />
-        <div style="margin-top:12px;">
-            <button type="submit">Login</button>
+            <h2 class="text-2xl font-bold text-center text-slate-900 mb-6">Admin Login</h2>
+
+            <!-- Error Message -->
+            <div th:if="${error}" class="rounded-md border border-red-200 bg-red-50 p-4 mb-4">
+                <p class="text-sm font-medium text-red-700" th:text="${error}">Error message will appear here.</p>
+            </div>
+
+            <!-- Admin Login Form -->
+            <form th:action="@{/admin/login}" method="post" class="space-y-4">
+                <div>
+                    <label for="admin-username" class="block text-sm font-medium text-slate-700">Username</label>
+                    <input
+                            type="text"
+                            name="username"
+                            id="admin-username"
+                            required
+                            class="form-input"
+                            placeholder="Admin username"
+                    />
+                </div>
+                <div>
+                    <label for="admin-password" class="block text-sm font-medium text-slate-700">Password</label>
+                    <input
+                            type="password"
+                            name="password"
+                            id="admin-password"
+                            required
+                            class="form-input"
+                            placeholder="Password"
+                    />
+                </div>
+
+                <div class="pt-2">
+                    <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-slate-900 hover:bg-slate-900/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500">
+                        Login
+                    </button>
+                </div>
+            </form>
+
+            <p class="mt-6 text-center text-sm text-slate-600">
+                Not an admin?
+                <!-- This link goes back to the main page login -->
+                <!-- CHANGED: Switched href to th:href to point to the correct login path -->
+                <a th:href="@{/login}" class="font-medium text-slate-600 hover:text-slate-500">
+                    Go back
+                </a>
+            </p>
         </div>
-    </form>
+    </div>
+</main>
 
-    <!--<p style="margin-top:12px; font-size:0.9em; color:#666;">
-        Tip: use <strong>admin</strong> / <strong>secret</strong> for dev.
-        -->
-    </p>
-</div>
 </body>
 </html>
+

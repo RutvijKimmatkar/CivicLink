@@ -1,40 +1,132 @@
-<!doctype html>
-<html xmlns:th="http://www.thymeleaf.org">
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="utf-8" />
-    <title>Assign Vendor</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Assign Vendor - CIVILINK</title>
+    <!-- Include Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { font-family: Arial, sans-serif; margin:24px; }
-        .btn { padding:8px 12px; background:#0366d6; color:white; text-decoration:none; border-radius:4px; }
+        /* Apply a default font, like Inter */
+        body {
+            font-family: "Inter", sans-serif;
+        }
+        /* Tailwind custom class for styled inputs */
+        @layer components {
+            .form-input {
+                @apply mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-slate-500 focus:border-slate-500 sm:text-sm;
+            }
+        }
     </style>
 </head>
-<body>
-<h2>Assign vendor for complaint <span th:text="${complaint.id}">#</span></h2>
+<body class="min-h-screen bg-slate-50 text-slate-900 antialiased bg-[image:radial-gradient(theme(colors.slate.200)_1px,transparent_1px)] [background-size:16px_16px]">
 
-<p>
-    <strong>User:</strong> <span th:text="${complaint.user != null ? complaint.user.username : '-'}">user</span><br/>
-    <strong>Category:</strong> <span th:text="${complaint.category}">category</span><br/>
-    <strong>Description:</strong> <span th:text="${complaint.description}">desc</span><br/>
-</p>
+<!-- --- Inline SVG Icons --- -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+    <symbol id="icon-logout" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line>
+    </symbol>
+    <symbol id="icon-chevron-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"></polyline>
+    </symbol>
+</svg>
 
-<form th:action="@{|/admin/complaints/${complaint.id}/assign|}" method="post">
-    <!-- render CSRF only if it's available in model -->
-    <input type="hidden" th:if="${_csrf != null}"
-           th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+<!-- Header Section (Admin State) -->
+<header class="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/80 backdrop-blur-md">
+    <div class="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <a th:href="@{/admin/complaints}" class="flex items-center gap-2">
+            <img
+                    src="/civiclink.png"
+                    alt="CIVILINK Logo"
+                    class="h-8 w-auto"
+            />
+        </a>
 
-    <label for="vendor">Select vendor</label>
-    <select name="vendorId" id="vendor">
-        <option value="" disabled selected>-- choose --</option>
-        <option th:each="v : ${vendors}"
-                th:value="${v.id}"
-                th:text="${v.name}">Vendor A</option>
-    </select>
+        <div class="flex items-center gap-4">
+            <!-- Admin Welcome -->
+            <span th:if="${adminName != null}" class="hidden sm:inline text-sm font-medium text-slate-600">
+                Admin: <strong th:text="${adminName}">User</strong>
+            </span>
 
-    <div style="margin-top:16px;">
-        <button type="submit" class="btn">Assign</button>
-        <a th:href="@{/admin/complaints}" style="margin-left:12px;">Cancel</a>
+            <!-- Logout button -->
+            <a th:href="@{/admin/logout}" class="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-slate-200 bg-white hover:bg-slate-100 hover:text-slate-900 h-10 px-4 py-2">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor"><use xlink:href="#icon-logout"></use></svg>
+                Logout
+            </a>
+        </div>
     </div>
-</form>
+</header>
+
+<!-- Main Content -->
+<main class="py-12">
+    <div class="container mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
+
+        <!-- Back to Complaint List Link -->
+        <div class="mb-6">
+            <a th:href="@{/admin/complaints}" class="inline-flex items-center gap-1 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor"><use xlink:href="#icon-chevron-left"></use></svg>
+                Back to Complaint List
+            </a>
+        </div>
+
+        <!-- Assign Vendor Card -->
+        <div class="rounded-lg border border-slate-200 bg-white text-slate-950 shadow-sm">
+            <!-- Card Header -->
+            <div class="flex flex-col space-y-1.5 p-6">
+                <h3 class="text-2xl font-semibold leading-none tracking-tight">
+                    Assign Vendor for Complaint #<span th:text="${complaint.id}"></span>
+                </h3>
+            </div>
+
+            <!-- Complaint Summary -->
+            <div class="p-6 pt-0 border-b border-slate-200">
+                <h4 class="text-lg font-medium text-slate-900 mb-2">Complaint Details</h4>
+                <div class="space-y-1 text-sm text-slate-600">
+                    <p>
+                        <strong>User:</strong>
+                        <span th:text="${complaint.user != null ? complaint.user.username : '-'}">user</span>
+                    </p>
+                    <p>
+                        <strong>Category:</strong>
+                        <span th:text="${complaint.category}">category</span>
+                    </p>
+                    <p>
+                        <strong>Description:</strong>
+                        <span th:text="${complaint.description}">desc</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Assign Form -->
+            <form th:action="@{|/admin/complaints/${complaint.id}/assign|}" method="post" class="p-6">
+                <!-- CSRF Token -->
+                <input type="hidden" th:if="${_csrf != null}"
+                       th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+                <!-- Vendor Select -->
+                <div>
+                    <label for="vendor" class="block text-sm font-medium text-slate-700">Select Vendor</label>
+                    <select name="vendorId" id="vendor" class="form-input">
+                        <option value="" disabled selected>-- Choose a vendor --</option>
+                        <option th:each="v : ${vendors}"
+                                th:value="${v.id}"
+                                th:text="${v.name}">Vendor A</option>
+                    </select>
+                </div>
+
+                <!-- Actions -->
+                <div class="mt-6 flex items-center gap-4">
+                    <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-slate-900 text-white hover:bg-slate-900/90 h-10 px-4 py-2 shadow-sm">
+                        Assign
+                    </button>
+                    <a th:href="@{/admin/complaints}" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-slate-200 bg-white hover:bg-slate-100 hover:text-slate-900 h-10 px-4 py-2">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
 
 </body>
 </html>
