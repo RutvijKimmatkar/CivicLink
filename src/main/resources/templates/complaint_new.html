@@ -1,35 +1,135 @@
-<!doctype html>
-<html xmlns:th="http://www.thymeleaf.org">
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="utf-8">
-    <title>New Complaint</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale-1.0" />
+    <title>New Complaint - CIVILINK</title>
+    <!-- Include Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Apply a default font, like Inter */
+        body {
+            font-family: "Inter", sans-serif;
+        }
+        /* Tailwind custom class for styled inputs */
+        @layer components {
+            .form-input {
+                @apply mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-slate-500 focus:border-slate-500 sm:text-sm;
+            }
+        }
+    </style>
 </head>
-<body>
-<h2>Create a complaint</h2>
+<body class="min-h-screen bg-slate-50 text-slate-900 antialiased bg-[image:radial-gradient(theme(colors.slate.200)_1px,transparent_1px)] [background-size:16px_16px]">
 
-<p th:if="${error}" th:text="${error}" style="color:red"></p>
+<!-- --- Inline SVG Icons --- -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+    <symbol id="icon-logout" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line>
+    </symbol>
+    <symbol id="icon-chevron-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"></polyline>
+    </symbol>
+</svg>
 
-<form th:action="@{/complaints}" method="post">
-    <label>Category:</label>
-    <select name="category" required>
-        <option th:each="c : ${categories}" th:value="${c}" th:text="${c}"></option>
-    </select>
+<!-- Header Section (Logged-In State) -->
+<header class="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/80 backdrop-blur-md">
+    <div class="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <a href="dashboard.html" class="flex items-center gap-2">
+            <!-- Using a placeholder for the logo -->
+            <img
+                    src="/civiclink.png"
+                    alt="CIVILINK Logo"
+                    class="h-8 w-auto"
+            />
+        </a>
 
-    <label>Description:</label>
-    <textarea name="description" required></textarea>
+        <div class="flex items-center gap-4">
+            <!-- Welcome message -->
+            <span class="hidden sm:inline text-sm font-medium text-slate-600">
+                    <!-- Welcome, <span th:text="${name}">User</span>! -->
 
-    <label>Location:</label>
-    <input type="text" name="location" required />
+                </span>
+            <!-- Logout button -->
+            <a th:href="@{/logout}" class="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-slate-200 bg-white hover:bg-slate-100 hover:text-slate-900 h-10 px-4 py-2">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor"><use xlink:href="#icon-logout"></use></svg>
+                Logout
+            </a>
+        </div>
+    </div>
+</header>
 
-    <label>Location details (optional):</label>
-    <input type="text" name="locationDescription" />
+<!-- Main Form Content -->
+<main class="py-12">
+    <div class="container mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
 
-    <label>Photo URL (optional):</label>
-    <input type="text" name="photo" />
+        <!-- Back to Dashboard Link -->
+        <div class="mb-6">
+            <a th:href="@{/dashboard}" class="inline-flex items-center gap-1 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor"><use xlink:href="#icon-chevron-left"></use></svg>
+                Back to Dashboard
+            </a>
+        </div>
 
-    <button type="submit">Submit Complaint</button>
-</form>
+        <!-- Form Card -->
+        <div class="rounded-lg border border-slate-200 bg-white text-slate-950 shadow-sm">
+            <div class="flex flex-col space-y-1.5 p-6">
+                <h3 class="text-2xl font-semibold leading-none tracking-tight">
+                    File a New Complaint
+                </h3>
+                <p class="text-sm text-slate-500">
+                    Please provide all the details about the issue.
+                </p>
+            </div>
 
-<p><a th:href="@{/dashboard}">Back to Dashboard</a></p>
+            <form th:action="@{/complaints}" method="post" class="space-y-4 p-6 pt-0">
+                <!-- Error Message -->
+                <div th:if="${error}" class="rounded-md border border-red-200 bg-red-50 p-4">
+                    <p class="text-sm font-medium text-red-700" th:text="${error}">Error message will appear here.</p>
+                </div>
+
+                <!-- Category -->
+                <div>
+                    <label for="category" class="block text-sm font-medium text-slate-700">Category</label>
+                    <select id="category" name="category" required class="form-input">
+                        <option value="" disabled selected>Select a category</option>
+                        <option th:each="c : ${categories}" th:value="${c}" th:text="${c}"></option>
+                    </select>
+                </div>
+
+                <!-- Description -->
+                <div>
+                    <label for="description" class="block text-sm font-medium text-slate-700">Description</label>
+                    <textarea id="description" name="description" required rows="4" class="form-input" placeholder="Describe the issue in detail..."></textarea>
+                </div>
+
+                <!-- Location -->
+                <div>
+                    <label for="location" class="block text-sm font-medium text-slate-700">Location</label>
+                    <input type="text" id="location" name="location" required class="form-input" placeholder="e.g., '123 Main St' or 'Park Entrance'" />
+                </div>
+
+                <!-- Location Details -->
+                <div>
+                    <label for="locationDescription" class="block text-sm font-medium text-slate-700">Location Details (Optional)</label>
+                    <input type="text" id="locationDescription" name="locationDescription" class="form-input" placeholder="e.g., 'Near the red mailbox'" />
+                </div>
+
+                <!-- Photo URL -->
+                <div>
+                    <label for="photo" class="block text-sm font-medium text-slate-700">Photo URL (Optional)</label>
+                    <input type="text" id="photo" name="photo" class="form-input" placeholder="https://example.com/image.jpg" />
+                </div>
+
+                <!-- Submit Button -->
+                <div class="pt-2">
+                    <button type="submit" class="w-full inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-slate-900 text-white hover:bg-slate-900/90 h-10 px-4 py-2 shadow-sm">
+                        Submit Complaint
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+
 </body>
 </html>

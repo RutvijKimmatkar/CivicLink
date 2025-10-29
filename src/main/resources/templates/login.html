@@ -1,29 +1,579 @@
-<!doctype html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head><meta charset="utf-8"><title>Login</title></head>
-<body>
-<h2>Login</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CIVILINK - Open Civic Complaint Portal</title>
+    <!-- Include Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Apply a default font, like Inter */
+        body {
+            font-family: "Inter", sans-serif;
+        }
+        /* This is to emulate the animate-in functionality from the React code */
+        @keyframes slide-in-from-top-4 {
+            from {
+                transform: translateY(-1rem);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        .animate-slide-in {
+            animation: slide-in-from-top-4 0.3s ease-out;
+        }
 
-<form th:action="@{/login}" method="post">
-    <input name="username" placeholder="Username" required/><br/>
-    <input name="password" type="password" placeholder="Password" required/><br/>
-    <button type="submit">Login</button>
+        /* --- New Animations for Modal --- */
+        @keyframes fade-in {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slide-in-from-bottom {
+            from { transform: translateY(2rem); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .animate-fade-in {
+            animation: fade-in 0.2s ease-out;
+        }
+        .animate-slide-in-bottom {
+            animation: slide-in-from-bottom 0.3s ease-out;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-white text-slate-900 antialiased">
 
-    <div style="margin-top:20px; text-align:center;">
-        <p style="font-size:0.9em; color:#555;">Or login as:</p>
-        <a href="/admin/login"
-           style="margin:5px; padding:8px 14px; background:#2b7; color:white; text-decoration:none; border-radius:4px;">
-            Admin
+<!-- Header Section -->
+<header class="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/80 backdrop-blur-md">
+    <div class="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <a href="/" class="flex items-center gap-2">
+            <!-- Replaced local image with placeholder -->
+            <img
+                    src="./civiclink.png"
+                    alt="CIVILINK Logo"
+                    class="h-8 w-auto"
+            />
         </a>
-        <a href="/vendor/login"
-           style="margin:5px; padding:8px 14px; background:#0077cc; color:white; text-decoration:none; border-radius:4px;">
-            Vendor
-        </a>
+
+        <!-- Desktop Nav -->
+        <nav class="hidden items-center space-x-2 md:flex">
+            <a href="#features" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-slate-100 hover:text-slate-900 h-10 px-4 py-2">
+                Features
+            </a>
+            <a href="#submit" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-slate-100 hover:text-slate-900 h-10 px-4 py-2">
+                Submit
+            </a>
+            <a href="#track" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-slate-100 hover:text-slate-900 h-10 px-4 py-2">
+                Track
+            </a>
+            <!-- Login Trigger -->
+            <a href="#login" class="login-trigger inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-slate-900 text-white hover:bg-slate-900/90 h-10 px-4 py-2">
+                Login
+            </a>
+        </nav>
+
+        <!-- Mobile Nav Button -->
+        <div class="md:hidden">
+            <button
+                    id="mobile-menu-btn"
+                    type="button"
+                    aria-label="Toggle mobile menu"
+                    class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-slate-100 hover:text-slate-900 h-10 w-10"
+            >
+                <!-- MenuIcon -->
+                <svg
+                        id="menu-icon"
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="w-6 h-6"
+                >
+                    <line x1="3" x2="21" y1="12" y2="12" />
+                    <line x1="3" x2="21" y1="6" y2="6" />
+                    <line x1="3" x2="21" y1="18" y2="18" />
+                </svg>
+                <!-- XIcon (hidden by default) -->
+                <svg
+                        id="close-icon"
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="w-6 h-6 hidden"
+                >
+                    <line x1="18" x2="6" y1="6" y2="18" />
+                    <line x1="6" x2="18" y1="6" y2="18" />
+                </svg>
+            </button>
+        </div>
     </div>
-</form>
 
-<p th:if="${error}" th:text="${error}" style="color:red"></p>
-<p th:if="${message}" th:text="${message}" style="color:green"></p>
-<p>No account? <a th:href="@{/register}">Register</a></p>
+    <!-- Mobile Nav Menu (hidden by default) -->
+    <div id="mobile-menu" class="hidden absolute top-16 left-0 z-40 w-full border-b border-slate-200 bg-white p-4 shadow-md md:hidden">
+        <nav class="flex flex-col space-y-2">
+            <a href="#features" class="mobile-nav-link inline-flex items-center justify-start rounded-md text-base font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-slate-100 hover:text-slate-900 h-10 px-4 py-2">
+                Features
+            </a>
+            <a href="#submit" class="mobile-nav-link inline-flex items-center justify-start rounded-md text-base font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-slate-100 hover:text-slate-900 h-10 px-4 py-2">
+                Submit
+            </a>
+            <a href="#track" class="mobile-nav-link inline-flex items-center justify-start rounded-md text-base font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-slate-100 hover:text-slate-900 h-10 px-4 py-2">
+                Track
+            </a>
+            <!-- Login Trigger -->
+            <a href="#login" class="login-trigger mobile-nav-link w-full text-base inline-flex items-center justify-center rounded-md font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-slate-900 text-white hover:bg-slate-900/90 h-10 px-4 py-2">
+                Login
+            </a>
+        </nav>
+    </div>
+</header>
+
+<main>
+    <!-- Hero Section -->
+    <section class="bg-white bg-[image:radial-gradient(theme(colors.slate.100)_1px,transparent_1px)] [background-size:16px_16px]">
+        <div class="container mx-auto flex max-w-7xl flex-col items-center px-4 pt-24 pb-16 text-center sm:px-6 sm:pt-32 sm:pb-24 lg:px-8">
+            <h1 class="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl md:text-6xl">
+                Open Civic Complaint Portal
+            </h1>
+            <p class="mt-6 max-w-2xl text-lg text-slate-600 sm:text-xl">
+                Our platform makes it easy to submit, track, and resolve your
+                complaints efficiently and transparently.
+            </p>
+            <div class="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+                <a href="#submit" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-slate-900 text-white hover:bg-slate-900/90 h-11 px-8">
+                    Submit a Complaint
+                </a>
+                <a href="#track" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-slate-200 bg-white hover:bg-slate-100 hover:text-slate-900 h-11 px-8">
+                    Track Your Status
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="bg-slate-50 py-16 sm:py-24 bg-[image:radial-gradient(theme(colors.slate.200)_1px,transparent_1px)] [background-size:16px_16px]">
+        <div class="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h2 class="text-base font-semibold uppercase tracking-wide text-slate-600">
+                    Get Started
+                </h2>
+                <p class="mt-2 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
+                    File your complaint in 3 easy steps
+                </p>
+            </div>
+            <div class="mt-16 grid gap-8 md:grid-cols-3">
+
+                <!-- Feature 1 -->
+                <div class="rounded-lg border border-slate-200 bg-white text-slate-950 shadow-sm relative pt-8">
+                    <div class="absolute -top-5 left-1/2 -translate-x-1/2 flex h-12 w-12 items-center justify-center rounded-full border-4 border-white bg-slate-900 font-bold text-white shadow-md">
+                        1
+                    </div>
+                    <div class="flex flex-col space-y-1.5 p-6">
+                        <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-slate-100">
+                            <!-- UserPlusIcon -->
+                            <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="24"
+                                    height="24"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    class="h-8 w-8 text-slate-900"
+                            >
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                                <circle cx="9" cy="7" r="4" />
+                                <line x1="19" x2="19" y1="8" y2="14" />
+                                <line x1="22" x2="16" y1="11" y2="11" />
+                            </svg>
+                        </div>
+                        <h3 class="text-2xl font-semibold leading-none tracking-tight text-center">Register & Login</h3>
+                    </div>
+                    <div class="p-6 pt-0">
+                        <p class="text-sm text-slate-500 text-center text-base text-slate-600">
+                            Quickly sign up or log in to your secure account to get started.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="rounded-lg border border-slate-200 bg-white text-slate-950 shadow-sm relative pt-8">
+                    <div class="absolute -top-5 left-1/2 -translate-x-1/2 flex h-12 w-12 items-center justify-center rounded-full border-4 border-white bg-slate-900 font-bold text-white shadow-md">
+                        2
+                    </div>
+                    <div class="flex flex-col space-y-1.5 p-6">
+                        <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-slate-100">
+                            <!-- FileTextIcon -->
+                            <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="24"
+                                    height="24"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    class="h-8 w-8 text-slate-900"
+                            >
+                                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+                                <polyline points="14 2 14 8 20 8" />
+                                <line x1="16" x2="8" y1="13" y2="13" />
+                                <line x1="16" x2="8" y1="17" y2="17" />
+                                <line x1="10" x2="8" y1="9" y2="9" />
+                            </svg>
+                        </div>
+                        <h3 class="text-2xl font-semibold leading-none tracking-tight text-center">File Your Complaint</h3>
+                    </div>
+                    <div class="p-6 pt-0">
+                        <p class="text-sm text-slate-500 text-center text-base text-slate-600">
+                            Fill out our guided form with all the appropriate details, location, and any evidence.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="rounded-lg border border-slate-200 bg-white text-slate-950 shadow-sm relative pt-8">
+                    <div class="absolute -top-5 left-1/2 -translate-x-1/2 flex h-12 w-12 items-center justify-center rounded-full border-4 border-white bg-slate-900 font-bold text-white shadow-md">
+                        3
+                    </div>
+                    <div class="flex flex-col space-y-1.5 p-6">
+                        <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-slate-100">
+                            <!-- SearchIcon -->
+                            <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="24"
+                                    height="24"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    class="h-8 w-8 text-slate-900"
+                            >
+                                <circle cx="11" cy="11" r="8" />
+                                <line x1="21" x2="16.65" y1="21" y2="16.65" />
+                            </svg>
+                        </div>
+                        <h3 class="text-2xl font-semibold leading-none tracking-tight text-center">Track Your Status</h3>
+                    </div>
+                    <div class="p-6 pt-0">
+                        <p class="text-sm text-slate-500 text-center text-base text-slate-600">
+                            Receive real-time updates and track your complaint's progress from submission to resolution.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- BMC Section -->
+    <section class="bg-white py-16 sm:py-24 bg-[image:radial-gradient(theme(colors.slate.100)_1px,transparent_1px)] [background-size:16px_16px]">
+        <div class="container mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col items-center justify-center text-center md:flex-row md:justify-between md:text-left md:space-x-8">
+                <div class="flex-shrink-0 mb-8 md:mb-0 md:w-1/3 flex justify-center md:justify-start">
+                    <!-- Replaced local image with placeholder -->
+                    <img
+                            src="https://placehold.co/160x160/eeeeee/334155?text=BMC+Logo"
+                            alt="Brihanmumbai Municipal Corporation (BMC) Logo"
+                            class="h-40 w-auto"
+                    />
+                </div>
+
+                <div class="md:w-2/3">
+                    <h2 class="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
+                        Collaborating for a Better City
+                    </h2>
+                    <p class="mt-4 text-lg leading-6 text-slate-600 sm:text-xl">
+                        We work closely with BMC authorities to ensure your voice is heard and acted upon efficiently.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section id="submit" class="bg-white py-16 sm:py-24 bg-[image:radial-gradient(theme(colors.slate.100)_1px,transparent_1px)] [background-size:16px_16px]">
+        <div class="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="overflow-hidden rounded-lg bg-slate-900 shadow-xl lg:grid lg:grid-cols-2 lg:gap-4">
+                <div class="px-6 pt-10 pb-12 sm:px-16 sm:pt-16 lg:py-16 lg:pr-0">
+                    <div class="lg:self-center">
+                        <h2 class="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+                            Ready to Be Heard?
+                        </h2>
+                        <p class="mt-4 text-lg leading-6 text-slate-300">
+                            Don't wait. Submit your complaint today and let us help you find
+                            a solution.
+                        </p>
+                        <a href="#submit-form" class="mt-8 inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-slate-100 text-slate-900 hover:bg-slate-100/80 h-11 px-8">
+                            Get Started Now
+                        </a>
+                    </div>
+                </div>
+                <div class="hidden -mt-6 lg:block">
+                    <div class="flex h-full items-center justify-center">
+                        <!-- FileTextIcon -->
+                        <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                class="h-48 w-48 text-slate-700 opacity-50"
+                        >
+                            <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+                            <polyline points="14 2 14 8 20 8" />
+                            <line x1="16" x2="8" y1="13" y2="13" />
+                            <line x1="16" x2="8" y1="17" y2="17" />
+                            <line x1="10" x2="8" y1="9" y2="9" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<!-- Footer Section -->
+<footer class="border-t border-slate-200 bg-white">
+    <div class="container mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        <div class="flex flex-col items-center justify-between gap-4 sm:flex-row">
+            <p class="text-center text-sm text-slate-500">
+                &copy; <span id="current-year"></span> CIVILINK. All rights reserved.
+            </p>
+            <div class="flex space-x-6">
+                <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" class="text-slate-400 hover:text-slate-500">
+                    <span class="sr-only">Twitter</span>
+                    <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" />
+                    </svg>
+                </a>
+                <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="text-slate-400 hover:text-slate-500">
+                    <span class="sr-only">GitHub</span>
+                    <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.165 6.839 9.49.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.026 2.747-1.026.546 1.379.202 2.398.1 2.65.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd" />
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- --- New Login Modal --- -->
+<div id="login-modal" class="hidden fixed inset-0 z-50 overflow-y-auto">
+    <!-- Modal Overlay -->
+    <div id="login-modal-overlay" class="fixed inset-0 bg-black/60 animate-fade-in"></div>
+
+    <!-- Modal Content -->
+    <!-- 1. Added my-8 for vertical margin (top/bottom) and removed m-auto -->
+    <div class="relative w-full max-w-md p-6 mx-auto my-8 bg-white rounded-lg shadow-xl animate-slide-in-bottom">
+        <!-- Close Button -->
+        <button id="close-modal-btn" type="button" class="absolute top-3 right-3 text-slate-400 hover:text-slate-600">
+            <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="w-6 h-6"
+            >
+                <line x1="18" x2="6" y1="6" y2="18" />
+                <line x1="6" x2="18" y1="6" y2="18" />
+            </svg>
+        </button>
+
+        <!-- --- MODIFIED CONTENT --- -->
+        <h2 class="text-2xl font-bold text-center text-slate-900 mb-6">Login</h2>
+
+        <form action="/login" method="POST" class="space-y-4">
+            <div>
+                <label for="username" class="sr-only">Username</label>
+                <input
+                        type="text"
+                        name="username"
+                        id="username"
+                        required
+                        class="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-slate-500 focus:border-slate-500 sm:text-sm"
+                        placeholder="Username"
+                />
+            </div>
+            <div>
+                <label for="password" class="sr-only">Password</label>
+                <input
+                        type="password"
+                        name="password"
+                        id="password"
+                        required
+                        class="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-slate-500 focus:border-slate-500 sm:text-sm"
+                        placeholder="Password"
+                />
+            </div>
+
+            <div>
+                <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-slate-900 hover:bg-slate-900/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500">
+                    Login
+                </button>
+            </div>
+
+            <div class="mt-5 text-center pt-4">
+                <p class="text-sm text-slate-600">Or login as:</p>
+                <!-- 2. Changed container to flex row with gap -->
+                <div class="flex justify-center gap-3 mt-3">
+                    <!-- 2. Applied outline styles, removed w-full -->
+                    <a href="/admin/login"
+                       class="flex justify-center py-2 px-4 border border-slate-900 rounded-md shadow-sm text-sm font-medium text-slate-900 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                        Admin
+                    </a>
+                    <!-- 2. Applied outline styles, removed w-full -->
+                    <a href="/vendor/login"
+                       class="flex justify-center py-2 px-4 border border-slate-900 rounded-md shadow-sm text-sm font-medium text-slate-900 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        Vendor
+                    </a>
+                </div>
+            </div>
+        </form>
+
+        <p class="mt-6 text-center text-sm text-slate-600">
+            No account?
+            <a href="/register" class="font-medium text-slate-600 hover:text-slate-500">
+                Register
+            </a>
+        </p>
+        <!-- --- END OF MODIFIED CONTENT --- -->
+
+    </div>
+</div>
+<!-- --- End of Login Modal --- -->
+
+
+<!-- JavaScript for Mobile Menu Toggle and Current Year -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Set current year in footer
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+
+        // --- Mobile menu toggle ---
+        const menuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const menuIcon = document.getElementById('menu-icon');
+        const closeIcon = document.getElementById('close-icon');
+        const navLinks = document.querySelectorAll('.mobile-nav-link');
+
+        function toggleMenu() {
+            const isMenuOpen = !mobileMenu.classList.contains('hidden');
+
+            // Toggle menu visibility
+            mobileMenu.classList.toggle('hidden');
+
+            // Add/remove animation class
+            if (!isMenuOpen) {
+                mobileMenu.classList.add('animate-slide-in');
+            } else {
+                mobileMenu.classList.remove('animate-slide-in');
+            }
+
+            // Toggle icon visibility
+            menuIcon.classList.toggle('hidden');
+            closeIcon.classList.toggle('hidden');
+
+            // Update ARIA expanded state
+            menuBtn.setAttribute('aria-expanded', !isMenuOpen);
+        }
+
+        // Toggle menu when button is clicked
+        menuBtn.addEventListener('click', toggleMenu);
+
+        // Close menu when a nav link is clicked
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                // Only close if it's not a login link
+                if (!link.classList.contains('login-trigger')) {
+                    if (!mobileMenu.classList.contains('hidden')) {
+                        toggleMenu();
+                    }
+                }
+            });
+        });
+
+        // --- Login Modal Logic ---
+        const loginModal = document.getElementById('login-modal');
+        const loginModalOverlay = document.getElementById('login-modal-overlay');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const loginTriggers = document.querySelectorAll('.login-trigger'); // Select all login buttons
+
+        function openLoginModal() {
+            loginModal.classList.remove('hidden');
+            // Ensure body can't scroll underneath
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeLoginModal() {
+            loginModal.classList.add('hidden');
+            // Restore body scroll
+            document.body.style.overflow = '';
+        }
+
+        // Add click listener to all login buttons
+        loginTriggers.forEach(trigger => {
+            trigger.addEventListener('click', (e) => {
+                e.preventDefault(); // Stop anchor link jump
+                openLoginModal();
+
+                // If on mobile, also close the mobile nav menu
+                if (!mobileMenu.classList.contains('hidden')) {
+                    toggleMenu();
+                }
+            });
+        });
+
+        // Close modal when 'X' button is clicked
+        closeModalBtn.addEventListener('click', closeLoginModal);
+
+        // Close modal when clicking on the overlay (outside the content)
+        loginModalOverlay.addEventListener('click', (e) => {
+            if (e.target === loginModalOverlay) {
+                closeLoginModal();
+            }
+        });
+
+        // Close modal with 'Escape' key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !loginModal.classList.contains('hidden')) {
+                closeLoginModal();
+            }
+        });
+
+    });
+</script>
+
 </body>
 </html>
+
+
+
+

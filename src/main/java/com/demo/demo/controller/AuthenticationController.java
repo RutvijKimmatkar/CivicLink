@@ -15,7 +15,7 @@ public class AuthenticationController {
 
     @GetMapping({"/", "/login"})
     public String loginForm(Model model) {
-        return "login";
+        return "login.html";
     }
 
     @PostMapping("/login")
@@ -31,7 +31,7 @@ public class AuthenticationController {
             return "redirect:/dashboard";
         } else {
             model.addAttribute("error", "Invalid username or password");
-            return "login";
+            return "login.html";
         }
     }
 
@@ -47,7 +47,7 @@ public class AuthenticationController {
         try {
             userService.register(username, email, number, password);
             model.addAttribute("message", "Registration successful. Please login.");
-            return "login";
+            return "login.html";
         } catch (IllegalArgumentException e) {
             model.addAttribute("error", e.getMessage());
             return "register";

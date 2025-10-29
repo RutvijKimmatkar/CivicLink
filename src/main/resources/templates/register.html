@@ -1,19 +1,140 @@
-<!doctype html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head><meta charset="utf-8"><title>Register</title></head>
-<body>
-<h2>Register</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Register - CIVILINK</title>
+    <!-- Include Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Apply a default font, like Inter */
+        body {
+            font-family: "Inter", sans-serif;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900 antialiased bg-[image:radial-gradient(theme(colors.slate.200)_1px,transparent_1px)] [background-size:16px_16px]">
 
-<form th:action="@{/register}" method="post">
-    <input name="username" placeholder="Username" required/><br/>
-    <input name="email" type="email" placeholder="Email" required/><br/>
-    <input name="number" placeholder="Phone number" required/><br/>
-    <input name="password" type="password" placeholder="Password" required/><br/>
-    <button type="submit">Register</button>
-</form>
+<!-- Register Page Content -->
+<main class="flex min-h-screen items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="w-full max-w-md space-y-8">
+        <!-- Card -->
+        <div class="relative w-full p-6 sm:p-8 bg-white rounded-lg shadow-xl">
+            <!-- Logo -->
+            <div class="flex justify-center mb-6">
+                <a href="civiclink.html" class="flex items-center gap-2">
+                    <img
+                            src="./civiclink.png"
+                            alt="CIVILINK Logo"
+                            class="h-8 w-auto"
+                    />
+                </a>
+            </div>
 
-<p th:if="${error}" th:text="${error}" style="color:red"></p>
-<p th:if="${message}" th:text="${message}" style="color:green"></p>
-<p>Already have an account? <a th:href="@{/login}">Login</a></p>
+            <!-- Title for registration form -->
+            <h2 class="text-2xl font-bold text-center text-slate-900 mb-6" id="register-title">Create an Account</h2>
+
+            <!-- --- MODIFIED FORM (added id) --- -->
+            <form action="/register" method="POST" class="space-y-4" id="register-form">
+                <div>
+                    <label for="reg-username" class="block text-sm font-medium text-slate-700">Username</label>
+                    <input
+                            type="text"
+                            name="username"
+                            id="reg-username"
+                            required
+                            class="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-slate-500 focus:border-slate-500 sm:text-sm"
+                            placeholder="Username"
+                    />
+                </div>
+                <div>
+                    <label for="reg-email" class="block text-sm font-medium text-slate-700">Email</label>
+                    <input
+                            type="email"
+                            name="email"
+                            id="reg-email"
+                            required
+                            class="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-slate-500 focus:border-slate-500 sm:text-sm"
+                            placeholder="Email"
+                    />
+                </div>
+                <div>
+                    <label for="reg-number" class="block text-sm font-medium text-slate-700">Phone number</label>
+                    <input
+                            type="text"
+                            name="number"
+                            id="reg-number"
+                            required
+                            class="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-slate-500 focus:border-slate-500 sm:text-sm"
+                            placeholder="Phone number"
+                    />
+                </div>
+                <div>
+                    <label for="reg-password" class="block text-sm font-medium text-slate-700">Password</label>
+                    <input
+                            type="password"
+                            name="password"
+                            id="reg-password"
+                            required
+                            class="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-slate-500 focus:border-slate-500 sm:text-sm"
+                            placeholder="Password"
+                    />
+                </div>
+
+                <div class="pt-2">
+                    <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-slate-900 hover:bg-slate-900/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500">
+                        Register
+                    </button>
+                </div>
+            </form>
+            <!-- --- END OF MODIFIED FORM --- -->
+
+            <!-- --- SUCCESS MESSAGE (hidden by default) --- -->
+            <div id="success-message" class="hidden">
+                <h2 class="text-2xl font-bold text-center text-slate-900 mb-4">Registration Successful!</h2>
+                <p class="text-center text-slate-600 mb-6">
+                    You can now log in with your new account.
+                </p>
+                <a href="civiclink.html" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-slate-900 hover:bg-slate-900/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500">
+                    Proceed to Login
+                </a>
+            </div>
+            <!-- --- END OF SUCCESS MESSAGE --- -->
+
+            <p class="mt-6 text-center text-sm text-slate-600" id="already-have-account">
+                Already have an account?
+                <!-- This link goes back to the main page -->
+                <a href="civiclink.html" class="font-medium text-slate-600 hover:text-slate-500">
+                    Login
+                </a>
+            </p>
+        </div>
+    </div>
+</main>
+
+<!-- --- NEW SCRIPT --- -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check for a success parameter in the URL
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('success') === 'true') {
+            const registerForm = document.getElementById('register-form');
+            const registerTitle = document.getElementById('register-title');
+            const successMessage = document.getElementById('success-message');
+            const alreadyHaveAccount = document.getElementById('already-have-account');
+
+            // Hide the registration form and its related elements
+            if (registerForm) registerForm.style.display = 'none';
+            if (registerTitle) registerTitle.style.display = 'none';
+            if (alreadyHaveAccount) alreadyHaveAccount.style.display = 'none';
+
+            // Show the success message
+            if (successMessage) successMessage.style.display = 'block';
+        }
+    });
+</script>
+<!-- --- END OF NEW SCRIPT --- -->
+
 </body>
 </html>
+
