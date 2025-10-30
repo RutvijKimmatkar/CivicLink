@@ -17,6 +17,11 @@ import java.nio.file.*;
 import java.util.UUID;
 import java.io.IOException;
 
+import com.demo.demo.dto.PublicComplaintDto;
+import java.util.stream.Collectors;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 @Service
 public class ComplaintService {
 
@@ -170,4 +175,40 @@ public class ComplaintService {
         if (notes != null && !notes.isBlank()) c.setAdminNotes(notes);
         repo.save(c);
     }
+
+    public List<PublicComplaintDto> findRecentPublicComplaints(int limit) {
+        // repo already has findTop50ByOrderByCreatedAtDesc; call it and map
+        List<Complaint> recent = repo.findTop50ByOrderByCreatedAtDesc(); // or choose a param-based repo method
+        return recent.stream().limit(limit).map(c -> {
+            PublicComplaintDto d = new PublicComplaintDto();
+            d.setId(c.getId());
+            d.setCategory(c.getCategory() != null ? c.getCategory().name() : null);
+            // produce a truncated or full description (front-end will truncate)
+            d.setDescription(c.getDescription());
+            // privacy: round coordinates to 4 decimal places (~11m). change precision as needed.
+            if (c.getLatitude() != null && c.getLongitude() != null) {
+                double lat = Math.round(c.getLatitude() * 10000d) / 10000d;
+                double lon = Math.round(c.getLongitude() * 10000d) / 10000d;
+                d.setLatitude(lat);
+                d.setLongitude(lon);
+            }
+            d.setStatus(c.getStatus() != null ? c.getStatus().name() : null);
+            d.setCreatedAt(c.getCreatedAt());
+            d.setPhoto(c.getPhoto()); // only if this is a public URL/path; otherwise null
+            return d;
+        }).collect(Collectors.toList());
+    }
+
+    public Map<String, Long> countByCategory() {
+        // lightweight approach: query all or use repo custom query for grouping
+        // If dataset is large, you should add a @Query in repo that does GROUP BY
+        List<Complaint> all = repo.findAll(); // acceptable for small dataset; replace if large
+        Map<String, Long> counts = all.stream()
+                .collect(Collectors.groupingBy(c -> (c.getCategory() != null ? c.getCategory().name() : "UNKNOWN"),
+                        Collectors.counting()));
+        // keep insertion order predictable (optional)
+        return new LinkedHashMap<>(counts);
+    }
+
+
 }
