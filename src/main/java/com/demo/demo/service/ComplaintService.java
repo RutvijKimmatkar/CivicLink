@@ -4,45 +4,78 @@ import com.demo.demo.model.Complaint;
 import com.demo.demo.model.ComplaintStatus;
 import com.demo.demo.model.User;
 import com.demo.demo.repo.ComplaintRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.multipart.MultipartFile;
-import java.nio.file.*;
-import java.util.UUID;
+
 import java.io.IOException;
+import java.nio.file.*;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import com.demo.demo.dto.PublicComplaintDto;
-import java.util.stream.Collectors;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 @Service
 public class ComplaintService {
 
     private final ComplaintRepository repo;
 
-    // add config property injection
-    @Value("${file.upload-dir:uploads}")
-    private String uploadDir;
-
     public ComplaintService(ComplaintRepository repo) {
         this.repo = repo;
     }
+
+    // upload dir config (default "uploads")
+    @Value("${file.upload-dir:uploads}")
+    private String uploadDir;
+
+    /* ----------------- counts & queries used by controllers ----------------- */
+
+    public long countAll() {
+        return repo.count();
+    }
+
+    public long countByStatus(ComplaintStatus status) {
+        // ensure repo has countByStatus(ComplaintStatus)
+        return repo.countByStatus(status);
+    }
+
+    public long countByUserId(Long userId) {
+        return repo.countByUser_Id(userId);
+    }
+
+    public List<Complaint> findByUserId(Long userId) {
+        return repo.findByUser_IdOrderByCreatedAtDesc(userId);
+    }
+
+    public List<Complaint> findAll() {
+        return repo.findAllByOrderByCreatedAtDesc();
+    }
+
+    // AdminController expects this exact method name
+    public List<Complaint> findAllByOrderByCreatedAtDesc() {
+        return repo.findAllByOrderByCreatedAtDesc();
+    }
+
+    public Optional<Complaint> findById(Long id) {
+        return repo.findById(id);
+    }
+
+    public List<Complaint> findByStatus(ComplaintStatus status) {
+        return repo.findByStatusOrderByCreatedAtDesc(status);
+    }
+
+    /* ----------------- create + file upload ----------------- */
 
     @Transactional
     public Complaint createComplaint(User user,
                                      com.demo.demo.model.ComplaintCategory category,
                                      String description,
-                                     MultipartFile photoFile,    // <-- changed type
+                                     MultipartFile photoFile,
                                      String location,
-                                     double latitude,
-                                     double longitude,
+                                     Double latitude,
+                                     Double longitude,
                                      String locationDescription) throws IOException {
         if (user == null) throw new IllegalArgumentException("user required");
         if (category == null) throw new IllegalArgumentException("category required");
@@ -58,22 +91,18 @@ public class ComplaintService {
         c.setStatus(ComplaintStatus.SUBMITTED);
         c.setCreatedAt(LocalDateTime.now());
 
-        c.setLatitude(latitude);
-        c.setLongitude(longitude);
+        if (latitude != null) c.setLatitude(latitude);
+        if (longitude != null) c.setLongitude(longitude);
 
-        // handle file upload
         if (photoFile != null && !photoFile.isEmpty()) {
-            // simple content-type check
             String contentType = photoFile.getContentType();
             if (contentType == null || !contentType.startsWith("image/")) {
                 throw new IllegalArgumentException("Uploaded file must be an image");
             }
 
-            // ensure directory exists
             Path uploadPath = Paths.get(uploadDir).toAbsolutePath().normalize();
             Files.createDirectories(uploadPath);
 
-            // create safe filename: timestamp + random UUID + original extension
             String original = Paths.get(photoFile.getOriginalFilename() == null ? "" : photoFile.getOriginalFilename()).getFileName().toString();
             String ext = "";
             int i = original.lastIndexOf('.');
@@ -82,47 +111,17 @@ public class ComplaintService {
             String filename = System.currentTimeMillis() + "-" + UUID.randomUUID() + ext;
             Path target = uploadPath.resolve(filename);
 
-            // copy file
             try {
                 Files.copy(photoFile.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
             } catch (IOException e) {
                 throw new IOException("Failed to save uploaded file", e);
             }
 
-            // store the accessible path (we'll expose uploads via /uploads/**)
+            // store path that will be served by static mapping (e.g. /uploads/**)
             c.setPhoto("/uploads/" + filename);
         }
 
         return repo.save(c);
-    }
-
-    // ... other existing service methods ...
-
-
-    /* ----------------- simple query helpers ----------------- */
-
-    public long countByUserId(Long userId) {
-        return repo.countByUser_Id(userId);
-    }
-
-    public List<Complaint> findByUserId(Long userId) {
-        return repo.findByUser_IdOrderByCreatedAtDesc(userId);
-    }
-
-    public List<Complaint> findAll() {
-        return repo.findAllByOrderByCreatedAtDesc();
-    }
-    // ✅ Add this missing method (this is what your AdminController calls)
-    public List<Complaint> findAllByOrderByCreatedAtDesc() {
-        return repo.findAllByOrderByCreatedAtDesc();
-    }
-
-    public Optional<Complaint> findById(Long id) {
-        return repo.findById(id);
-    }
-
-    public List<Complaint> findByStatus(ComplaintStatus status) {
-        return repo.findByStatusOrderByCreatedAtDesc(status);
     }
 
     /* ----------------- admin/vendor actions ----------------- */
@@ -131,7 +130,6 @@ public class ComplaintService {
     public void assignVendor(Long complaintId, Long vendorId) {
         Complaint c = repo.findById(complaintId).orElseThrow(() -> new IllegalArgumentException("Complaint not found"));
         c.setAssignedVendorId(vendorId);
-        // When assigned, we usually move to IN_PROGRESS if not already
         if (c.getStatus() == null || c.getStatus() == ComplaintStatus.SUBMITTED) {
             c.setStatus(ComplaintStatus.IN_PROGRESS);
         }
@@ -152,6 +150,7 @@ public class ComplaintService {
         repo.save(c);
     }
 
+    // AdminController expects markInProgressWithNotes(Long,String)
     @Transactional
     public void markInProgressWithNotes(Long complaintId, String notes) {
         Complaint c = repo.findById(complaintId).orElseThrow(() -> new IllegalArgumentException("Complaint not found"));
@@ -176,16 +175,15 @@ public class ComplaintService {
         repo.save(c);
     }
 
+    /* ----------------- public listing helpers ----------------- */
+
     public List<PublicComplaintDto> findRecentPublicComplaints(int limit) {
-        // repo already has findTop50ByOrderByCreatedAtDesc; call it and map
-        List<Complaint> recent = repo.findTop50ByOrderByCreatedAtDesc(); // or choose a param-based repo method
+        List<Complaint> recent = repo.findTop50ByOrderByCreatedAtDesc();
         return recent.stream().limit(limit).map(c -> {
             PublicComplaintDto d = new PublicComplaintDto();
             d.setId(c.getId());
             d.setCategory(c.getCategory() != null ? c.getCategory().name() : null);
-            // produce a truncated or full description (front-end will truncate)
             d.setDescription(c.getDescription());
-            // privacy: round coordinates to 4 decimal places (~11m). change precision as needed.
             if (c.getLatitude() != null && c.getLongitude() != null) {
                 double lat = Math.round(c.getLatitude() * 10000d) / 10000d;
                 double lon = Math.round(c.getLongitude() * 10000d) / 10000d;
@@ -194,21 +192,16 @@ public class ComplaintService {
             }
             d.setStatus(c.getStatus() != null ? c.getStatus().name() : null);
             d.setCreatedAt(c.getCreatedAt());
-            d.setPhoto(c.getPhoto()); // only if this is a public URL/path; otherwise null
+            d.setPhoto(c.getPhoto());
             return d;
         }).collect(Collectors.toList());
     }
 
     public Map<String, Long> countByCategory() {
-        // lightweight approach: query all or use repo custom query for grouping
-        // If dataset is large, you should add a @Query in repo that does GROUP BY
-        List<Complaint> all = repo.findAll(); // acceptable for small dataset; replace if large
+        List<Complaint> all = repo.findAll();
         Map<String, Long> counts = all.stream()
                 .collect(Collectors.groupingBy(c -> (c.getCategory() != null ? c.getCategory().name() : "UNKNOWN"),
                         Collectors.counting()));
-        // keep insertion order predictable (optional)
         return new LinkedHashMap<>(counts);
     }
-
-
 }

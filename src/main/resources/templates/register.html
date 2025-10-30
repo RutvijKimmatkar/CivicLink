@@ -4,115 +4,241 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Register - CIVILINK</title>
-    <!-- Include Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Apply a default font, like Inter */
         body {
             font-family: "Inter", sans-serif;
         }
+
+        /* --- Animated Map Background --- */
+        #map-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.15;
+            z-index: -1;
+        }
+
+        /* --- NEW: Mobile Nav Animation --- */
+        @keyframes slide-in-from-top-4 {
+            from {
+                transform: translateY(-1rem);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        .animate-slide-in {
+            animation: slide-in-from-top-4 0.3s ease-out;
+        }
     </style>
 </head>
-<body class="min-h-screen bg-slate-50 text-slate-900 antialiased bg-[image:radial-gradient(theme(colors.slate.200)_1px,transparent_1px)] [background-size:16px_16px]">
+<body class="min-h-screen bg-slate-50 text-slate-900 antialiased">
 
-<!-- Register Page Content -->
-<main class="flex min-h-screen items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-    <div class="w-full max-w-md space-y-8">
-        <!-- Card -->
+<header class="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/80 backdrop-blur-sm">
+    <div class="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <a th:href="@{/login}" class="flex items-center gap-2">
+            <img
+                    src="/civiclink.png"
+                    alt="CIVILINK Logo"
+                    class="h-8 w-auto"
+            />
+        </a>
+
+        <nav class="hidden items-center space-x-2 md:flex">
+            <a th:href="@{/login#features}" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-slate-100 hover:text-slate-900 h-10 px-4 py-2">
+                Features
+            </a>
+            <a th:href="@{/login#submit}" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-slate-100 hover:text-slate-900 h-10 px-4 py-2">
+                Submit
+            </a>
+            <a th:href="@{/login#track}" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-slate-100 hover:text-slate-900 h-10 px-4 py-2">
+                Track
+            </a>
+            <a th:href="@{/public/dashboard}" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-slate-100 hover:text-slate-900 h-10 px-4 py-2">
+                Public Dashboard
+            </a>
+            <a th:href="@{/login}" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-slate-900 text-white hover:bg-slate-900/90 h-10 px-4 py-2">
+                Login
+            </a>
+        </nav>
+
+        <div class="md:hidden">
+            <button
+                    id="mobile-menu-btn"
+                    type="button"
+                    aria-label="Toggle mobile menu"
+                    class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-slate-100 hover:text-slate-900 h-10 w-10"
+            >
+                <svg
+                        id="menu-icon"
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="w-6 h-6"
+                >
+                    <line x1="3" x2="21" y1="12" y2="12" />
+                    <line x1="3" x2="21" y1="6" y2="6" />
+                    <line x1="3" x2="21" y1="18" y2="18" />
+                </svg>
+                <svg
+                        id="close-icon"
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="w-6 h-6 hidden"
+                >
+                    <line x1="18" x2="6" y1="6" y2="18" />
+                    <line x1="6" x2="18" y1="6" y2="18" />
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <div id="mobile-menu" class="hidden absolute top-16 left-0 z-40 w-full border-b border-slate-200 bg-white p-4 shadow-md md:hidden">
+        <nav class="flex flex-col space-y-2">
+            <a th:href="@{/login#features}" class="mobile-nav-link inline-flex items-center justify-start rounded-md text-base font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-slate-100 hover:text-slate-900 h-10 px-4 py-2">
+                Features
+            </a>
+            <a th:href="@{/login#submit}" class="mobile-nav-link inline-flex items-center justify-start rounded-md text-base font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-slate-100 hover:text-slate-900 h-10 px-4 py-2">
+                Submit
+            </a>
+            <a th:href="@{/login#track}" class="mobile-nav-link inline-flex items-center justify-start rounded-md text-base font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-slate-100 hover:text-slate-900 h-10 px-4 py-2">
+                Track
+            </a>
+            <a th:href="@{/public/dashboard}" class="mobile-nav-link inline-flex items-center justify-start rounded-md text-base font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-slate-100 hover:text-slate-900 h-10 px-4 py-2">
+                Public Dashboard
+            </a>
+            <a th:href="@{/login}" class="mobile-nav-link w-full text-base inline-flex items-center justify-center rounded-md font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-slate-900 text-white hover:bg-slate-900/90 h-10 px-4 py-2">
+                Login
+            </a>
+        </nav>
+    </div>
+</header>
+<canvas id="map-canvas"></canvas>
+
+<main class="flex min-h-screen items-center justify-center py-12 px-4 sm:px-6 lg:px-8 pt-16">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-5xl">
+
         <div class="relative w-full p-6 sm:p-8 bg-white rounded-lg shadow-xl">
-            <!-- Logo -->
             <div class="flex justify-center mb-6">
-                <a href="civiclink.html" class="flex items-center gap-2">
-                    <img
-                            src="./civiclink.png"
-                            alt="CIVILINK Logo"
-                            class="h-8 w-auto"
-                    />
+                <a th:href="@{/login}" class="flex items-center gap-2">
+                    <img src="/civiclink.png" alt="CIVILINK Logo" class="h-8 w-auto" />
                 </a>
             </div>
 
-            <!-- Title for registration form -->
-            <h2 class="text-2xl font-bold text-center text-slate-900 mb-6" id="register-title">Create an Account</h2>
+            <h2 class="text-2xl font-bold text-center text-slate-900 mb-6" id="register-title">
+                Create an Account
+            </h2>
 
-            <!-- --- MODIFIED FORM (added id) --- -->
-            <form action="/register" method="POST" class="space-y-4" id="register-form">
+            <form th:action="@{/register}" method="POST" class="space-y-4" id="register-form">
                 <div>
                     <label for="reg-username" class="block text-sm font-medium text-slate-700">Username</label>
-                    <input
-                            type="text"
-                            name="username"
-                            id="reg-username"
-                            required
-                            class="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-slate-500 focus:border-slate-500 sm:text-sm"
-                            placeholder="Username"
-                    />
+                    <input type="text" name="username" id="reg-username" required
+                           class="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-slate-500 focus:border-slate-500 sm:text-sm"
+                           placeholder="Username"/>
                 </div>
+
                 <div>
                     <label for="reg-email" class="block text-sm font-medium text-slate-700">Email</label>
-                    <input
-                            type="email"
-                            name="email"
-                            id="reg-email"
-                            required
-                            class="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-slate-500 focus:border-slate-500 sm:text-sm"
-                            placeholder="Email"
-                    />
+                    <input type="email" name="email" id="reg-email" required
+                           class="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-slate-500 focus:border-slate-500 sm:text-sm"
+                           placeholder="Email"/>
                 </div>
+
                 <div>
                     <label for="reg-number" class="block text-sm font-medium text-slate-700">Phone number</label>
-                    <input
-                            type="text"
-                            name="number"
-                            id="reg-number"
-                            required
-                            class="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-slate-500 focus:border-slate-500 sm:text-sm"
-                            placeholder="Phone number"
-                    />
+                    <input type="text" name="number" id="reg-number" required
+                           class="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-slate-500 focus:border-slate-500 sm:text-sm"
+                           placeholder="Phone number"/>
                 </div>
+
                 <div>
                     <label for="reg-password" class="block text-sm font-medium text-slate-700">Password</label>
-                    <input
-                            type="password"
-                            name="password"
-                            id="reg-password"
-                            required
-                            class="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-slate-500 focus:border-slate-500 sm:text-sm"
-                            placeholder="Password"
-                    />
+                    <input type="password" name="password" id="reg-password" required
+                           class="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-slate-500 focus:border-slate-500 sm:text-sm"
+                           placeholder="Password"/>
                 </div>
 
                 <div class="pt-2">
-                    <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-slate-900 hover:bg-slate-900/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500">
+                    <button type="submit"
+                            class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-slate-900 hover:bg-slate-900/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500">
                         Register
                     </button>
                 </div>
             </form>
-            <!-- --- END OF MODIFIED FORM --- -->
 
-            <!-- --- SUCCESS MESSAGE (hidden by default) --- -->
             <div id="success-message" class="hidden">
                 <h2 class="text-2xl font-bold text-center text-slate-900 mb-4">Registration Successful!</h2>
                 <p class="text-center text-slate-600 mb-6">
                     You can now log in with your new account.
                 </p>
-                <a href="civiclink.html" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-slate-900 hover:bg-slate-900/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500">
+                <a th:href="@{/login}" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-slate-900 hover:bg-slate-900/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500">
                     Proceed to Login
                 </a>
             </div>
-            <!-- --- END OF SUCCESS MESSAGE --- -->
 
             <p class="mt-6 text-center text-sm text-slate-600" id="already-have-account">
                 Already have an account?
-                <!-- This link goes back to the main page -->
-                <a href="civiclink.html" class="font-medium text-slate-600 hover:text-slate-500">
-                    Login
-                </a>
+                <a th:href="@{/login}" class="font-medium text-slate-600 hover:text-slate-500">Login</a>
             </p>
         </div>
+
+        <div class="relative w-full p-6 sm:p-8 bg-white rounded-lg shadow-xl flex flex-col justify-center text-center">
+            <h2 class="text-2xl font-bold text-slate-900 mb-4">Join a Community of Change</h2>
+            <p class="text-md text-slate-600 mb-8">
+                Build a better city, one complaint at a time
+            </p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+                <div class="bg-slate-100 rounded-lg p-4 shadow-sm">
+                    <p class="text-sm font-medium text-slate-600">Total</p>
+                    <p class="text-3xl font-bold text-slate-900" th:text="${totalComplaints}">142</p>
+                </div>
+
+                <div class="bg-green-100 rounded-lg p-4 shadow-sm">
+                    <p class="text-sm font-medium text-green-700">Solved</p>
+                    <p class="text-3xl font-bold text-green-800" th:text="${solvedComplaints}">108</p>
+                </div>
+
+                <div class="bg-yellow-100 rounded-lg p-4 shadow-sm">
+                    <p class="text-sm font-medium text-yellow-700">Pending</p>
+                    <p class="text-3xl font-bold text-yellow-800" th:text="${pendingComplaints}">34</p>
+                </div>
+            </div>
+
+            <div class="mt-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-2">Resolution Rate</h3>
+                <div class="w-full bg-slate-200 rounded-full h-4">
+                    <div class="bg-green-500 h-4 rounded-full transition-all duration-500"
+                         style="width: 76%;" th:style="'width:' + ${#numbers.formatInteger(resolutionPercent, 0)} + '%'">
+                    </div>
+                </div>
+                <p class="text-sm text-slate-600 mt-2"
+                   th:text="${#numbers.formatInteger(resolutionPercent, 0)} + '% resolved'">76% resolved</p>
+            </div>
+        </div>
+
     </div>
 </main>
 
-<!-- --- NEW SCRIPT --- -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Check for a success parameter in the URL
@@ -123,18 +249,134 @@
             const successMessage = document.getElementById('success-message');
             const alreadyHaveAccount = document.getElementById('already-have-account');
 
-            // Hide the registration form and its related elements
             if (registerForm) registerForm.style.display = 'none';
             if (registerTitle) registerTitle.style.display = 'none';
             if (alreadyHaveAccount) alreadyHaveAccount.style.display = 'none';
-
-            // Show the success message
             if (successMessage) successMessage.style.display = 'block';
+        }
+
+        // --- NEW: Mobile menu toggle logic ---
+        const menuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const menuIcon = document.getElementById('menu-icon');
+        const closeIcon = document.getElementById('close-icon');
+        const navLinks = document.querySelectorAll('.mobile-nav-link');
+
+        function toggleMenu() {
+            if (!mobileMenu || !menuIcon || !closeIcon) return; // Guard clause
+
+            const isMenuOpen = !mobileMenu.classList.contains('hidden');
+            mobileMenu.classList.toggle('hidden');
+
+            if (!isMenuOpen) {
+                mobileMenu.classList.add('animate-slide-in');
+            } else {
+                mobileMenu.classList.remove('animate-slide-in');
+            }
+
+            menuIcon.classList.toggle('hidden');
+            closeIcon.classList.toggle('hidden');
+            menuBtn.setAttribute('aria-expanded', !isMenuOpen);
+        }
+
+        if (menuBtn) {
+            menuBtn.addEventListener('click', toggleMenu);
+        }
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                if (!mobileMenu.classList.contains('hidden')) {
+                    toggleMenu();
+                }
+            });
+        });
+
+        // --- Animated Map Background ---
+        const canvas = document.getElementById('map-canvas');
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+
+            function resizeCanvas() {
+                canvas.width = canvas.offsetWidth;
+                canvas.height = canvas.offsetHeight;
+            }
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            const streets = [];
+            const numStreets = 15;
+            const offset = { x: 0, y: 0 };
+
+            for (let i = 0; i < numStreets; i++) {
+                streets.push({
+                    type: 'horizontal',
+                    y: (canvas.height / numStreets) * i,
+                    width: Math.random() > 0.7 ? 3 : 1.5
+                });
+                streets.push({
+                    type: 'vertical',
+                    x: (canvas.width / numStreets) * i,
+                    width: Math.random() > 0.7 ? 3 : 1.5
+                });
+            }
+
+            const landmarks = [];
+            for (let i = 0; i < 8; i++) {
+                landmarks.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    radius: Math.random() * 8 + 4,
+                    pulsePhase: Math.random() * Math.PI * 2
+                });
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                offset.x = Math.sin(Date.now() / 2000) * 20;
+                offset.y = Math.cos(Date.now() / 2500) * 20;
+
+                ctx.strokeStyle = '#94a3b8';
+                ctx.fillStyle = '#94a3b8';
+
+                streets.forEach(street => {
+                    ctx.lineWidth = street.width;
+                    ctx.beginPath();
+
+                    if (street.type === 'horizontal') {
+                        const y = street.y + offset.y;
+                        ctx.moveTo(0, y);
+                        ctx.lineTo(canvas.width, y);
+                    } else {
+                        const x = street.x + offset.x;
+                        ctx.moveTo(x, 0);
+                        ctx.lineTo(x, canvas.height);
+                    }
+
+                    ctx.stroke();
+                });
+
+                landmarks.forEach(landmark => {
+                    const pulse = Math.sin(Date.now() / 500 + landmark.pulsePhase) * 0.3 + 0.7;
+                    ctx.globalAlpha = pulse * 0.6;
+                    ctx.beginPath();
+                    ctx.arc(
+                        landmark.x + offset.x,
+                        landmark.y + offset.y,
+                        landmark.radius,
+                        0,
+                        Math.PI * 2
+                    );
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                });
+
+                requestAnimationFrame(animate);
+            }
+
+            animate();
         }
     });
 </script>
-<!-- --- END OF NEW SCRIPT --- -->
-
 </body>
 </html>
-

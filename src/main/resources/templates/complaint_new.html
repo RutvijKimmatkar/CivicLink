@@ -2,26 +2,26 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale-1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>New Complaint - CIVILINK</title>
-    <!-- Include Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Apply a default font, like Inter */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
         body {
             font-family: "Inter", sans-serif;
         }
-        /* Tailwind custom class for styled inputs */
+
+        /* Updated focus ring to match indigo theme */
         @layer components {
             .form-input {
-                @apply mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-slate-500 focus:border-slate-500 sm:text-sm;
+                @apply mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm;
             }
         }
     </style>
 </head>
 <body class="min-h-screen bg-slate-50 text-slate-900 antialiased bg-[image:radial-gradient(theme(colors.slate.200)_1px,transparent_1px)] [background-size:16px_16px]">
 
-<!-- --- Inline SVG Icons --- -->
 <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
     <symbol id="icon-logout" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line>
@@ -31,38 +31,21 @@
     </symbol>
 </svg>
 
-<!-- Header Section (Logged-In State) -->
 <header class="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/80 backdrop-blur-md">
-    <div class="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+    <div class="container mx-auto flex h-16 max-w-7xl items-center justify-center sm:justify-between px-4 sm:px-6 lg:px-8">
         <a href="dashboard.html" class="flex items-center gap-2">
-            <!-- Using a placeholder for the logo -->
             <img
                     src="/civiclink.png"
                     alt="CIVILINK Logo"
                     class="h-8 w-auto"
             />
         </a>
-
-        <div class="flex items-center gap-4">
-            <!-- Welcome message -->
-            <span class="hidden sm:inline text-sm font-medium text-slate-600">
-                    <!-- Welcome, <span th:text="${name}">User</span>! -->
-
-                </span>
-            <!-- Logout button -->
-            <a th:href="@{/logout}" class="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-slate-200 bg-white hover:bg-slate-100 hover:text-slate-900 h-10 px-4 py-2">
-                <svg class="h-4 w-4" fill="none" stroke="currentColor"><use xlink:href="#icon-logout"></use></svg>
-                Logout
-            </a>
-        </div>
     </div>
 </header>
 
-<!-- Main Form Content -->
-<main class="py-12">
-    <div class="container mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
+<main class="py-8">
+    <div class="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 
-        <!-- Back to Dashboard Link -->
         <div class="mb-6">
             <a th:href="@{/dashboard}" class="inline-flex items-center gap-1 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
                 <svg class="h-4 w-4" fill="none" stroke="currentColor"><use xlink:href="#icon-chevron-left"></use></svg>
@@ -70,104 +53,118 @@
             </a>
         </div>
 
-        <!-- Form Card -->
-        <div class="rounded-lg border border-slate-200 bg-white text-slate-950 shadow-sm">
-            <div class="flex flex-col space-y-1.5 p-6">
-                <h3 class="text-2xl font-semibold leading-none tracking-tight">
-                    File a New Complaint
-                </h3>
-                <p class="text-sm text-slate-500">
-                    Please provide all the details about the issue.
-                </p>
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold tracking-tight text-slate-900">
+                File a New Complaint
+            </h1>
+            <p class="mt-1 text-lg text-slate-600">
+                Please provide all the details about the issue.
+            </p>
+        </div>
+
+
+        <form th:action="@{/complaints}" method="post" enctype="multipart/form-data" class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+
+            <div class="lg:col-span-3 space-y-6">
+                <div class="rounded-lg border border-slate-200 bg-white shadow-sm">
+                    <div class="flex flex-col space-y-1.5 p-6 border-b">
+                        <h3 class="text-xl font-semibold leading-none tracking-tight">
+                            1. Complaint Details
+                        </h3>
+                        <p class="text-sm text-slate-500">
+                            Describe what's wrong.
+                        </p>
+                    </div>
+
+                    <div class="p-6 space-y-6">
+                        <div th:if="${error}" class="rounded-md border border-red-200 bg-red-50 p-4">
+                            <p class="text-sm font-medium text-red-700" th:text="${error}">Error message will appear here.</p>
+                        </div>
+
+                        <div>
+                            <label for="category" class="block text-sm font-medium text-slate-700">Category</label>
+                            <select id="category" name="category" required class="form-input">
+                                <option value="" disabled selected>Select a category</option>
+                                <option th:each="c : ${categories}" th:value="${c}" th:text="${c}"></option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="description" class="block text-sm font-medium text-slate-700">Description</label>
+                            <textarea id="description" name="description" required rows="5" class="form-input" placeholder="Describe the issue in detail..."></textarea>
+                        </div>
+
+                        <div>
+                            <label for="photoFile" class="block text-sm font-medium text-slate-700">Upload Photo (Optional)</label>
+                            <input id="photoFile" name="photoFile" type="file" accept="image/*"
+                                   class="mt-1 block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer" />
+                            <p class="text-xs text-slate-400 mt-1">Submit a photo to help identify the problem.</p>
+                        </div>
+
+                        <div>
+                            <label for="photo" class="block text-sm font-medium text-slate-700">Photo Description (Optional)</label>
+                            <input type="text" id="photo" name="photo" class="form-input" placeholder="e.g., 'Large pothole on the corner'" />
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <form th:action="@{/complaints}" method="post" enctype="multipart/form-data" class="space-y-4 p-6 pt-0">
-                <!-- Error Message -->
-                <div th:if="${error}" class="rounded-md border border-red-200 bg-red-50 p-4">
-                    <p class="text-sm font-medium text-red-700" th:text="${error}">Error message will appear here.</p>
+            <div class="lg:col-span-2 space-y-6 sticky top-24">
+                <div class="rounded-lg border border-slate-200 bg-white shadow-sm">
+                    <div class="flex flex-col space-y-1.5 p-6 border-b">
+                        <h3 class="text-xl font-semibold leading-none tracking-tight">
+                            2. Location
+                        </h3>
+                        <p class="text-sm text-slate-500">
+                            Pinpoint the issue on the map.
+                        </p>
+                    </div>
+
+                    <div class="p-6 space-y-4">
+                        <div class="flex gap-2">
+                            <input id="map-search" type="text" placeholder="Search for a place or address" class="form-input flex-grow" />
+                            <button type="button" id="map-search-btn" class="flex-shrink-0 px-3 py-2 rounded-md bg-indigo-700 text-white hover:bg-indigo-800 transition">
+                                Search
+                            </button>
+                        </div>
+
+                        <button type="button" id="use-location-btn" class="w-full px-3 py-2 rounded-md bg-indigo-100 text-indigo-700 hover:bg-indigo-200 transition">
+                            Use my current location
+                        </button>
+
+                        <ul id="search-results" class="mt-2 bg-white border border-slate-200 rounded-md shadow-sm hidden"></ul>
+
+                        <div id="map" class="rounded-md" style="height: 300px; border:1px solid #ddd; margin-top:12px;"></div>
+
+                        <input type="hidden" id="latitude" name="latitude" th:value="${latitude}" />
+                        <input type="hidden" id="longitude" name="longitude" th:value="${longitude}" />
+
+                        <div>
+                            <label for="location" class="block text-sm font-medium text-slate-700">Location Name / Address</label>
+                            <input type="text" id="location" name="location" required class="form-input" placeholder="e.g., '123 Main St' or 'Park Entrance'" />
+                            <p class="text-xs text-slate-400 mt-1">This will be auto-filled by the map.</p>
+                        </div>
+
+                        <div>
+                            <label for="locationDescription" class="block text-sm font-medium text-slate-700">Location Details (Optional)</label>
+                            <input type="text" id="locationDescription" name="locationDescription" class="form-input" placeholder="e.g., 'Near the red mailbox'" />
+                        </div>
+                    </div>
                 </div>
+            </div>
 
+            <div class="lg:col-span-5 mt-4 flex justify-start">
+                <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium bg-indigo-800 text-white hover:bg-indigo-900 h-11 px-6 py-2 transition-colors shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-700 focus-visible:ring-offset-2">
+                    Submit Complaint
+                </button>
+            </div>
+        </form>
 
-
-                <!-- Category -->
-                <div>
-                    <label for="category" class="block text-sm font-medium text-slate-700">Category</label>
-                    <select id="category" name="category" required class="form-input">
-                        <option value="" disabled selected>Select a category</option>
-                        <option th:each="c : ${categories}" th:value="${c}" th:text="${c}"></option>
-                    </select>
-                </div>
-
-                <!-- Description -->
-                <div>
-                    <label for="description" class="block text-sm font-medium text-slate-700">Description</label>
-                    <textarea id="description" name="description" required rows="4" class="form-input" placeholder="Describe the issue in detail..."></textarea>
-                </div>
-
-
-
-                <!-- hidden inputs to submit coordinates -->
-                <input type="hidden" id="latitude" name="latitude" th:value="${latitude}" />
-                <input type="hidden" id="longitude" name="longitude" th:value="${longitude}" />
-
-                <!-- Map -->
-                <div id="map" style="height: 350px; border:1px solid #ddd; margin-top:12px; border-radius:8px;"></div>
-
-
-                <!-- Search bar -->
-                <div class="mt-3 flex gap-2">
-                    <input id="map-search" type="text" placeholder="Search for a place or address" class="form-input flex-grow" />
-                    <button type="button" id="map-search-btn" class="px-3 py-2 rounded-md bg-slate-900 text-white hover:bg-slate-800 transition">
-                        Search
-                    </button>
-                    <button type="button" id="use-location-btn" class="px-3 py-2 rounded-md bg-green-600 text-white hover:bg-green-500 transition">
-                        Use my location
-                    </button>
-                </div>
-
-                <!-- Search results list -->
-                <ul id="search-results" class="mt-2 bg-white border border-slate-200 rounded-md shadow-sm hidden"></ul>
-
-                <!-- Location -->
-                <div>
-                    <label for="location" class="block text-sm font-medium text-slate-700">Location</label>
-                    <input type="text" id="location" name="location" required class="form-input" placeholder="e.g., '123 Main St' or 'Park Entrance'" />
-                </div>
-
-                <!-- Location Details -->
-                <div>
-                    <label for="locationDescription" class="block text-sm font-medium text-slate-700">Location Details (Optional)</label>
-                    <input type="text" id="locationDescription" name="locationDescription" class="form-input" placeholder="e.g., 'Near the red mailbox'" />
-                </div>
-
-                <!-- Photo file input -->
-                <div>
-                    <label for="photoFile" class="block text-sm font-medium text-slate-700">Photo (optional)</label>
-                    <input id="photoFile" name="photoFile" type="file" accept="image/*"
-                           class="mt-1 block w-full text-sm" />
-                    <p class="text-xs text-slate-400 mt-1">Pick an image from your device. It will be uploaded and stored locally.</p>
-                </div>
-
-                <!-- Photo URL -->
-                <div>
-                    <label for="photo" class="block text-sm font-medium text-slate-700">Photo description (Optional)</label> <!-- changed photo url to photo desc -->
-                    <input type="text" id="photo" name="photo" class="form-input" placeholder="Description of the photo" />
-                </div>
-
-
-
-                <!-- Submit -->
-                <div class="pt-2">
-                    <button type="submit" ...>Submit Complaint</button>
-                </div>
-            </form>
-        </div>
     </div>
 </main>
 
 </body>
 
-<!-- Put this once at the end of the page, before </body> -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -179,10 +176,15 @@
         padding: 0;
         max-height: 240px;
         overflow: auto;
+        /* Position it to overlay content below */
+        position: absolute;
+        width: calc(100% - 3rem); /* p-6 is 1.5rem, so 2x is 3rem */
+        z-index: 1000;
     }
     #search-results li {
         padding: 8px 10px;
         border-bottom: 1px solid rgba(0,0,0,0.04);
+        background-color: white;
     }
     #search-results li:hover { background:#f8fafc; cursor:pointer; }
     #search-results.hidden { display:none; }
@@ -202,7 +204,8 @@
         const useLocationBtn = document.getElementById('use-location-btn');
         const latInput = document.getElementById('latitude');
         const lonInput = document.getElementById('longitude');
-        const locationInput = document.querySelector('input[name="location"]');
+        // This selector is more specific and correct now
+        const locationInput = document.getElementById('location');
 
         if (!mapEl) {
             console.error('Map element #map not found.');
@@ -228,20 +231,45 @@
             map.setView([lat, lng], Math.max(map.getZoom(), 15));
             updateLatLngInputs(lat, lng);
             if (label && locationInput) {
-                locationInput.value = label;
+                // Check if label is just coords, if so, don't set it
+                if (!/^-?\d+\.\d+,\s*-?\d+\.\d+$/.test(label)) {
+                    locationInput.value = label;
+                }
             }
         }
         function onMarkerDragged(e) {
             const p = e.target.getLatLng();
             updateLatLngInputs(p.lat, p.lng);
+            // After dragging, try to reverse geocode to get an address
+            reverseGeocode(p.lat, p.lng);
         }
         function updateLatLngInputs(lat, lng) {
             if (latInput) latInput.value = lat;
             if (lonInput) lonInput.value = lng;
         }
 
+        // Reverse geocode function
+        async function reverseGeocode(lat, lng) {
+            const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18`;
+            try {
+                const res = await fetch(url, { headers: { 'Accept': 'application/json' }});
+                if (!res.ok) throw new Error('Reverse geocode failed');
+                const data = await res.json();
+                if (data && data.display_name && locationInput) {
+                    locationInput.value = data.display_name;
+                }
+            } catch (err) {
+                console.warn('Reverse geocode error:', err);
+                if (locationInput) locationInput.value = ''; // Clear if lookup fails
+            }
+        }
+
         // allow clicking map to set marker
-        map.on('click', (e) => setMarker(e.latlng.lat, e.latlng.lng, ''));
+        map.on('click', (e) => {
+            setMarker(e.latlng.lat, e.latlng.lng, '');
+            reverseGeocode(e.latlng.lat, e.latlng.lng); // Get address on click
+        });
+
 
         // Nominatim search (no server-side key)
         async function searchPlace(q) {
@@ -285,7 +313,7 @@
             const q = searchInput.value.trim();
             if (!q) return;
             // basic debounce guard: disable button while searching
-            if (searchBtn) { searchBtn.disabled = true; searchBtn.textContent = 'Searching...'; }
+            if (searchBtn) { searchBtn.disabled = true; searchBtn.textContent = '...'; }
             try {
                 const results = await searchPlace(q);
                 showResults(results);
@@ -309,7 +337,8 @@
         // hide results if clicking outside
         document.addEventListener('click', (ev) => {
             if (!resultsEl) return;
-            if (ev.target === searchInput || resultsEl.contains(ev.target)) return;
+            // Also check if the click target is the search button
+            if (ev.target === searchInput || ev.target === searchBtn || resultsEl.contains(ev.target)) return;
             resultsEl.classList.add('hidden');
         });
 
@@ -328,6 +357,7 @@
                     const lon = pos.coords.longitude;
                     setMarker(lat, lon, 'Your current location');
                     map.setView([lat, lon], 15);
+                    reverseGeocode(lat, lon); // Get address for current location
                     useLocationBtn.disabled = false;
                     useLocationBtn.innerText = prevText;
                 }, (err) => {
@@ -342,13 +372,11 @@
         try {
             const latV = parseFloat(latInput && latInput.value);
             const lonV = parseFloat(lonInput && lonInput.value);
-            if (!isNaN(latV) && !isNaN(lonV)) {
-                setMarker(latV, lonV, '');
+            if (!isNaN(latV) && !isNaN(lonV) && latV !== 0 && lonV !== 0) {
+                setMarker(latV, lonV, locationInput.value || '');
             }
         } catch(e) { /* ignore */ }
 
-        // small UX: show results via keyboard arrow selection - optional enhancement
-        // (left out to keep code short)
 
         // final: expose small debug helper to console if needed
         window.__civiclink_map = { map, setMarker };

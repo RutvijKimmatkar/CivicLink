@@ -11,6 +11,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
+import com.demo.demo.model.ComplaintStatus;
 
 @Controller
 public class ComplaintController {
@@ -22,7 +23,20 @@ public class ComplaintController {
         this.complaintService = complaintService;
         this.userService = userService;
     }
+    /*@GetMapping("/register")
+    public String registerForm(Model model) {
+        long total = complaintService.countAll();
+        long solved = complaintService.countByStatus(ComplaintStatus.COMPLETED);
+        long pending = total - solved;
+        double percentage = total > 0 ? (solved * 100.0 / total) : 0.0;
 
+        model.addAttribute("totalComplaints", total);
+        model.addAttribute("solvedComplaints", solved);
+        model.addAttribute("pendingComplaints", pending);
+        model.addAttribute("resolutionPercent", percentage);
+
+        return "register";
+    }*/
     // Show the complaint creation form
     @GetMapping("/complaints/new")
     public String newComplaintForm(HttpSession session, Model model) {
@@ -76,6 +90,8 @@ public class ComplaintController {
             model.addAttribute("categories", ComplaintCategory.values());
             return "complaint_new";
         }
+
+
 
         //return "redirect:/dashboard";
     }

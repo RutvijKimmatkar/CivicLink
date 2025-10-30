@@ -10,6 +10,8 @@ public interface ComplaintRepository extends JpaRepository<Complaint, Long> {
     List<Complaint> findByStatusOrderByCreatedAtDesc(ComplaintStatus status);
 
     List<Complaint> findAllByOrderByCreatedAtDesc();
+    // Count all complaints with a specific status
+    long countByStatus(ComplaintStatus status);
 
     // ✅ Add these
     long countByUser_Id(Long userId);
@@ -18,6 +20,9 @@ public interface ComplaintRepository extends JpaRepository<Complaint, Long> {
     // inside public interface ComplaintRepository extends JpaRepository<Complaint, Long> {
     // return latest N complaints (Spring Data supports TopN)
     List<Complaint> findTop50ByOrderByCreatedAtDesc();
+
+
+
 
     // useful index hint method shown above already: findAllByOrderByCreatedAtDesc()
 }

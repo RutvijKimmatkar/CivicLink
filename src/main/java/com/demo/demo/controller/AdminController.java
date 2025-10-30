@@ -15,14 +15,8 @@ import java.util.List;
 /**
  * Admin UI/controller for reviewing and acting on complaints.
  *
- * NOTE:
- * - Requires session attribute "isAdmin" = Boolean.TRUE to permit access.
- * - Templates expected:
- *   - admin/complaints_list
- *   - admin/complaint_view
- *   - admin/assign
- *
- * Services must implement the methods used below (add to your services if missing).
+ * - Keeps backward-compatible POST mappings (approve <-> inprogress) because templates
+ *   in your repo sometimes post to /inprogress while others used /approve.
  */
 @Controller
 @RequestMapping("/admin")
@@ -36,31 +30,22 @@ public class AdminController {
         this.vendorService = vendorService;
     }
 
-    // ---------- helpers ----------
     private boolean isAdmin(HttpSession session) {
         Object o = session.getAttribute("isAdmin");
         return o instanceof Boolean && ((Boolean) o);
     }
 
-    // ---------- routes ----------
-
-    /**
-     * List complaints. Optional ?status=SUBMITTED|IN_PROGRESS|COMPLETED|REJECTED
-     */
     @GetMapping("/complaints")
     public String listComplaints(HttpSession session, Model model) {
         if (!isAdmin(session)) return "redirect:/admin/login";
 
-        // show everything ordered by createdAt desc
+        // must exist on ComplaintService: findAllByOrderByCreatedAtDesc()
         List<Complaint> complaints = complaintService.findAllByOrderByCreatedAtDesc();
         model.addAttribute("complaints", complaints);
         model.addAttribute("adminName", session.getAttribute("adminName"));
         return "admin/complaints_list";
     }
 
-    /**
-     * View single complaint details.
-     */
     @GetMapping("/complaints/{id}")
     public String viewComplaint(@PathVariable Long id,
                                 HttpSession session,
@@ -79,10 +64,9 @@ public class AdminController {
         return "admin/complaint_view";
     }
 
-    /**
-     * Approve (mark in-progress) with optional notes.
-     */
-    @PostMapping("/complaints/{id}/approve")
+    // ----- Approve / mark in-progress -----
+    // Templates might POST to either /approve or /inprogress — support both.
+    @PostMapping({"/complaints/{id}/approve", "/complaints/{id}/inprogress"})
     public String approveComplaint(@PathVariable Long id,
                                    @RequestParam(required = false) String notes,
                                    HttpSession session,
@@ -98,9 +82,7 @@ public class AdminController {
         return "redirect:/admin/complaints/" + id;
     }
 
-    /**
-     * Reject complaint with optional reason/notes.
-     */
+    // ----- Reject -----
     @PostMapping("/complaints/{id}/reject")
     public String rejectComplaint(@PathVariable Long id,
                                   @RequestParam(required = false) String reason,
@@ -117,9 +99,7 @@ public class AdminController {
         return "redirect:/admin/complaints/" + id;
     }
 
-    /**
-     * Show assign form (GET). Template must show vendors and form posts to the POST below.
-     */
+    // ----- Assign (GET form) -----
     @GetMapping("/complaints/{id}/assign")
     public String showAssignForm(@PathVariable Long id,
                                  HttpSession session,
@@ -134,14 +114,12 @@ public class AdminController {
         }
 
         model.addAttribute("complaint", opt.get());
-        model.addAttribute("vendors", vendorService.findAll());
+        model.addAttribute("vendors", vendorService.findAll()); // vendorService must implement findAll()
         model.addAttribute("adminName", session.getAttribute("adminName"));
         return "admin/assign";
     }
 
-    /**
-     * Process assign (POST).
-     */
+    // ----- Assign (POST) -----
     @PostMapping("/complaints/{id}/assign")
     public String doAssign(@PathVariable Long id,
                            @RequestParam Long vendorId,
@@ -158,9 +136,7 @@ public class AdminController {
         return "redirect:/admin/complaints";
     }
 
-    /**
-     * Mark complaint completed by admin (force close).
-     */
+    // ----- Complete by admin (force-close) -----
     @PostMapping("/complaints/{id}/complete")
     public String completeByAdmin(@PathVariable Long id,
                                   @RequestParam(required = false) String notes,
