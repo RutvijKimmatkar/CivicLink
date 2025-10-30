@@ -36,6 +36,8 @@ public class ComplaintService {
                                      String description,
                                      MultipartFile photoFile,    // <-- changed type
                                      String location,
+                                     double latitude,
+                                     double longitude,
                                      String locationDescription) throws IOException {
         if (user == null) throw new IllegalArgumentException("user required");
         if (category == null) throw new IllegalArgumentException("category required");
@@ -50,6 +52,9 @@ public class ComplaintService {
         c.setLocationDescription(locationDescription);
         c.setStatus(ComplaintStatus.SUBMITTED);
         c.setCreatedAt(LocalDateTime.now());
+
+        c.setLatitude(latitude);
+        c.setLongitude(longitude);
 
         // handle file upload
         if (photoFile != null && !photoFile.isEmpty()) {

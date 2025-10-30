@@ -41,6 +41,8 @@ public class ComplaintController {
                                   @RequestParam(required = false) String location,
                                   @RequestParam(required = false) String locationDescription,
                                   @RequestParam(required = false) MultipartFile photoFile,
+                                  @RequestParam(required = false) Double latitude,   // NEW
+                                  @RequestParam(required = false) Double longitude,  // NEW
                                   HttpSession session,
                                   Model model) {
 
@@ -67,13 +69,14 @@ public class ComplaintController {
 
         try {
             // createComplaint will handle saving file if photoFile present
-            complaintService.createComplaint(user, category, description, photoFile, location, locationDescription);
+            complaintService.createComplaint(user, category, description, photoFile, location, latitude, longitude, locationDescription);
+            return "redirect:/dashboard";
         } catch (IOException ex) {
             model.addAttribute("error", "Failed to upload image: " + ex.getMessage());
             model.addAttribute("categories", ComplaintCategory.values());
             return "complaint_new";
         }
 
-        return "redirect:/dashboard";
+        //return "redirect:/dashboard";
     }
 }
