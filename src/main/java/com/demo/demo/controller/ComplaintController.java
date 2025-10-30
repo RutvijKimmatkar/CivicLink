@@ -9,6 +9,8 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import java.io.IOException;
 
 @Controller
 public class ComplaintController {
@@ -36,11 +38,12 @@ public class ComplaintController {
     @PostMapping("/complaints")
     public String createComplaint(@RequestParam ComplaintCategory category,
                                   @RequestParam String description,
-                                  @RequestParam(required = false) String photo,
-                                  @RequestParam String location,
+                                  @RequestParam(required = false) String location,
                                   @RequestParam(required = false) String locationDescription,
+                                  @RequestParam(required = false) MultipartFile photoFile,
                                   HttpSession session,
                                   Model model) {
+
         Object userIdObj = session.getAttribute("userId");
         if (userIdObj == null) return "redirect:/login";
 
@@ -62,10 +65,15 @@ public class ComplaintController {
             return "complaint_new";
         }
 
-        // Create complaint
-        complaintService.createComplaint(user, category, description, photo, location, locationDescription);
+        try {
+            // createComplaint will handle saving file if photoFile present
+            complaintService.createComplaint(user, category, description, photoFile, location, locationDescription);
+        } catch (IOException ex) {
+            model.addAttribute("error", "Failed to upload image: " + ex.getMessage());
+            model.addAttribute("categories", ComplaintCategory.values());
+            return "complaint_new";
+        }
 
-        // Redirect back to dashboard which shows the updated count/list
         return "redirect:/dashboard";
     }
 }

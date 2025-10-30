@@ -11,25 +11,32 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.multipart.MultipartFile;
+import java.nio.file.*;
+import java.util.UUID;
+import java.io.IOException;
+
 @Service
 public class ComplaintService {
 
     private final ComplaintRepository repo;
 
+    // add config property injection
+    @Value("${file.upload-dir:uploads}")
+    private String uploadDir;
+
     public ComplaintService(ComplaintRepository repo) {
         this.repo = repo;
     }
 
-    /**
-     * Create and persist a complaint.
-     */
     @Transactional
     public Complaint createComplaint(User user,
                                      com.demo.demo.model.ComplaintCategory category,
                                      String description,
-                                     String photo,
+                                     MultipartFile photoFile,    // <-- changed type
                                      String location,
-                                     String locationDescription) {
+                                     String locationDescription) throws IOException {
         if (user == null) throw new IllegalArgumentException("user required");
         if (category == null) throw new IllegalArgumentException("category required");
         if (description == null || description.isBlank()) throw new IllegalArgumentException("description required");
@@ -37,16 +44,50 @@ public class ComplaintService {
 
         Complaint c = new Complaint();
         c.setUser(user);
-        c.setCategory(category); // ✅ FIXED: use the enum directly, not string
+        c.setCategory(category);
         c.setDescription(description);
-        c.setPhoto(photo);
         c.setLocation(location);
         c.setLocationDescription(locationDescription);
         c.setStatus(ComplaintStatus.SUBMITTED);
-        c.setCreatedAt(java.time.LocalDateTime.now());
+        c.setCreatedAt(LocalDateTime.now());
+
+        // handle file upload
+        if (photoFile != null && !photoFile.isEmpty()) {
+            // simple content-type check
+            String contentType = photoFile.getContentType();
+            if (contentType == null || !contentType.startsWith("image/")) {
+                throw new IllegalArgumentException("Uploaded file must be an image");
+            }
+
+            // ensure directory exists
+            Path uploadPath = Paths.get(uploadDir).toAbsolutePath().normalize();
+            Files.createDirectories(uploadPath);
+
+            // create safe filename: timestamp + random UUID + original extension
+            String original = Paths.get(photoFile.getOriginalFilename() == null ? "" : photoFile.getOriginalFilename()).getFileName().toString();
+            String ext = "";
+            int i = original.lastIndexOf('.');
+            if (i > 0) ext = original.substring(i);
+
+            String filename = System.currentTimeMillis() + "-" + UUID.randomUUID() + ext;
+            Path target = uploadPath.resolve(filename);
+
+            // copy file
+            try {
+                Files.copy(photoFile.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException e) {
+                throw new IOException("Failed to save uploaded file", e);
+            }
+
+            // store the accessible path (we'll expose uploads via /uploads/**)
+            c.setPhoto("/uploads/" + filename);
+        }
 
         return repo.save(c);
     }
+
+    // ... other existing service methods ...
+
 
     /* ----------------- simple query helpers ----------------- */
 

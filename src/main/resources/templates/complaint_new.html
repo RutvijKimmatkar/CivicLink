@@ -81,7 +81,7 @@
                 </p>
             </div>
 
-            <form th:action="@{/complaints}" method="post" class="space-y-4 p-6 pt-0">
+            <form th:action="@{/complaints}" method="post" enctype="multipart/form-data" class="space-y-4 p-6 pt-0">
                 <!-- Error Message -->
                 <div th:if="${error}" class="rounded-md border border-red-200 bg-red-50 p-4">
                     <p class="text-sm font-medium text-red-700" th:text="${error}">Error message will appear here.</p>
@@ -114,17 +114,25 @@
                     <input type="text" id="locationDescription" name="locationDescription" class="form-input" placeholder="e.g., 'Near the red mailbox'" />
                 </div>
 
-                <!-- Photo URL -->
+                <!-- Photo file input -->
                 <div>
-                    <label for="photo" class="block text-sm font-medium text-slate-700">Photo URL (Optional)</label>
-                    <input type="text" id="photo" name="photo" class="form-input" placeholder="https://example.com/image.jpg" />
+                    <label for="photoFile" class="block text-sm font-medium text-slate-700">Photo (optional)</label>
+                    <input id="photoFile" name="photoFile" type="file" accept="image/*"
+                           class="mt-1 block w-full text-sm" />
+                    <p class="text-xs text-slate-400 mt-1">Pick an image from your device. It will be uploaded and stored locally.</p>
                 </div>
 
-                <!-- Submit Button -->
+                <!-- Photo URL -->
+                <div>
+                    <label for="photo" class="block text-sm font-medium text-slate-700">Photo description (Optional)</label> <!-- changed photo url to photo desc -->
+                    <input type="text" id="photo" name="photo" class="form-input" placeholder="Description of the photo" />
+                </div>
+
+
+
+                <!-- Submit -->
                 <div class="pt-2">
-                    <button type="submit" class="w-full inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-slate-900 text-white hover:bg-slate-900/90 h-10 px-4 py-2 shadow-sm">
-                        Submit Complaint
-                    </button>
+                    <button type="submit" ...>Submit Complaint</button>
                 </div>
             </form>
         </div>
