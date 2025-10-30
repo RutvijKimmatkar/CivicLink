@@ -1,30 +1,194 @@
-<!doctype html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head><meta charset="utf-8"/><title>Complaint details</title></head>
-<body>
-<!-- show flash messages -->
-<p th:if="${message != null}" th:text="${message}"></p>
-<p th:if="${error != null}" th:text="${error}" style="color:red"></p>
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Complaint Details - CIVILINK</title>
+    <!-- Include Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Apply a default font, like Inter */
+        body {
+            font-family: "Inter", sans-serif;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900 antialiased bg-[image:radial-gradient(theme(colors.slate.200)_1px,transparent_1px)] [background-size:16px_16px]">
 
-<a th:href="@{/vendor/complaints}">&larr; Back to list</a>
+<!-- --- Inline SVG Icons --- -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+    <symbol id="icon-logout" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line>
+    </symbol>
+    <symbol id="icon-chevron-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"></polyline>
+    </symbol>
+</svg>
 
-<h2>Complaint #<span th:text="${complaint != null ? complaint.id : '-'}">#</span></h2>
+<!-- Header Section (Logged-In State) -->
+<header class="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/80 backdrop-blur-md">
+    <div class="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <a th:href="@{/vendor/dashboard}" class="flex items-center gap-2">
+            <img
+                    src="/civiclink.png"
+                    alt="CIVILINK Logo"
+                    class="h-8 w-auto"
+            />
+        </a>
 
-<!-- rest unchanged, with null checks -->
-<p><label>Category:</label> <span th:text="${complaint != null && complaint.category != null ? complaint.category : '-'}">cat</span></p>
-<!-- ... other fields ... -->
+        <div class="flex items-center gap-4">
+            <!-- Welcome message -->
+            <span class="hidden sm:inline text-sm font-medium text-slate-600">
+                Welcome, <span th:text="${vendorName != null ? vendorName : (vendor != null ? vendor.name : 'Vendor')}">Vendor</span>
+            </span>
+            <!-- Logout button -->
+            <a th:href="@{/vendor/logout}" class="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-slate-200 bg-white hover:bg-slate-100 hover:text-slate-900 h-10 px-4 py-2">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor"><use xlink:href="#icon-logout"></use></svg>
+                Logout
+            </a>
+        </div>
+    </div>
+</header>
 
-<!-- actions -->
-<form th:if="${complaint != null}" th:action="@{|/vendor/complaints/${complaint.id}/accept|}" method="post" style="display:inline">
-    <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-    <button type="submit">Accept</button>
-</form>
+<!-- Main Form Content -->
+<main class="py-12">
+    <div class="container mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
 
-<form th:if="${complaint != null}" th:action="@{|/vendor/complaints/${complaint.id}/complete|}" method="post" style="display:inline; margin-left:8px;">
-    <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-    <input name="notes" placeholder="notes" />
-    <button type="submit">Complete</button>
-</form>
+        <!-- Back to Dashboard Link -->
+        <div class="mb-6">
+            <a th:href="@{/vendor/complaints}" class="inline-flex items-center gap-1 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor"><use xlink:href="#icon-chevron-left"></use></svg>
+                Back to Complaint List
+            </a>
+        </div>
+
+        <!-- Flash Messages -->
+        <div th:if="${message != null}" class="rounded-md border border-green-200 bg-green-50 p-4 mb-4">
+            <p class="text-sm font-medium text-green-700" th:text="${message}">Success message.</p>
+        </div>
+        <div th:if="${error != null}" class="rounded-md border border-red-200 bg-red-50 p-4 mb-4">
+            <p class="text-sm font-medium text-red-700" th:text="${error}">Error message.</p>
+        </div>
+
+        <!-- Form Card -->
+        <div class="rounded-lg border border-slate-200 bg-white text-slate-950 shadow-sm">
+            <!-- Card Header -->
+            <div class="flex flex-col space-y-1.5 p-6">
+                <h3 class="text-2xl font-semibold leading-none tracking-tight">
+                    Complaint #<span th:text="${complaint != null ? complaint.id : '-'}">1</span>
+                </h3>
+            </div>
+
+            <!-- Card Content - Details -->
+            <div class="p-6 pt-0 grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-6">
+                <div>
+                    <label class="block text-sm font-medium text-slate-500">Category</label>
+                    <p class="text-base font-medium text-slate-900" th:text="${complaint != null && complaint.category != null ? complaint.category : '-'}">category</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-500">Status</label>
+                    <p class="text-base font-medium text-slate-900" th:text="${complaint != null && complaint.status != null ? complaint.status : '-'}">status</p>
+                </div>
+                <div class="sm:col-span-2">
+                    <label class="block text-sm font-medium text-slate-500">Description</label>
+                    <p class="text-base font-medium text-slate-900" th:text="${complaint != null && complaint.description != null ? complaint.description : '-'}">desc</p>
+                </div>
+                <div class="sm:col-span-2">
+                    <label class="block text-sm font-medium text-slate-500">Location</label>
+                    <p id="complaint-location" class="text-base font-medium text-slate-900"
+                       th:text="${complaint != null && complaint.location != null ? complaint.location : '-'}">loc</p>
+
+                    <!-- Hidden lat/lng for the map -->
+                    <p id="lat" th:text="${complaint != null ? complaint.latitude : ''}" hidden></p>
+                    <p id="lon" th:text="${complaint != null ? complaint.longitude : ''}" hidden></p>
+
+                    <!-- Map display -->
+                    <div id="map" class="mt-3 rounded-md border border-slate-200" style="height: 300px;"></div>
+
+                    <!-- Optional: Google Maps link -->
+                    <a th:if="${complaint != null && complaint.latitude != null && complaint.longitude != null}"
+                       th:href="@{|https://www.google.com/maps?q=${complaint.latitude},${complaint.longitude}|}"
+                       target="_blank"
+                       class="text-sm text-blue-600 hover:underline mt-2 inline-block">
+                        Open in Google Maps
+                    </a>
+                </div>
+                <div class="sm:col-span-2">
+                    <label class="block text-sm font-medium text-slate-500">Created</label>
+                    <p class="text-base font-medium text-slate-900" th:text="${complaint != null && complaint.createdAt != null ? #temporals.format(complaint.createdAt, 'yyyy-MM-dd HH:mm') : '-'}">date</p>
+                </div>
+                <!-- Photo -->
+                <div class="sm:col-span-2" th:if="${complaint != null and complaint.photo != null and !#strings.isEmpty(complaint.photo)}">
+                    <label class="block text-sm font-medium text-slate-500">Photo</label>
+                    <img th:src="${complaint.photo}" alt="Complaint Photo" class="mt-2 rounded-lg border border-slate-200" style="max-width:300px;">
+                </div>
+            </div>
+
+            <!-- Card Footer - Actions -->
+            <div class="border-t border-slate-200 bg-slate-50/50 p-6">
+                <h4 class="text-lg font-semibold text-slate-900 mb-4">Actions</h4>
+                <div class="flex flex-wrap items-center gap-4">
+
+                    <!-- Accept Form -->
+                    <form th:if="${complaint != null}" th:action="@{|/vendor/complaints/${complaint.id}/accept|}" method="post" class="inline">
+                        <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-blue-500 text-white hover:bg-blue-600 focus:ring-blue-500 h-10 px-4 py-2 shadow-sm">
+                            Accept
+                        </button>
+                    </form>
+
+                    <!-- Complete Form -->
+                    <form th:if="${complaint != null}" th:action="@{|/vendor/complaints/${complaint.id}/complete|}" method="post" class="inline flex flex-wrap items-center gap-2">
+                        <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_f.token}" />
+
+                        <label for="notes" class="sr-only">Notes</label>
+                        <input
+                                type="text"
+                                name="notes"
+                                id="notes"
+                                placeholder="Add optional notes..."
+                                class="block w-full sm:w-auto px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-slate-500 focus:border-slate-500 sm:text-sm"
+                        />
+                        <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-green-500 text-white hover:bg-green-600 focus:ring-green-500 h-10 px-4 py-2 shadow-sm">
+                            Complete
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Leaflet dependencies -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const latText = document.getElementById('lat')?.innerText.trim();
+        const lonText = document.getElementById('lon')?.innerText.trim();
+        const mapContainer = document.getElementById('map');
+        const locationName = document.getElementById('complaint-location')?.innerText || 'Unknown location';
+
+        const lat = parseFloat(latText);
+        const lon = parseFloat(lonText);
+
+        if (isNaN(lat) || isNaN(lon) || !mapContainer) {
+            mapContainer.innerHTML = "<p class='text-sm text-slate-500 p-4'>No coordinates available for this complaint.</p>";
+            return;
+        }
+
+        const map = L.map('map', { zoomControl: false, dragging: false, scrollWheelZoom: false })
+            .setView([lat, lon], 15);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        L.marker([lat, lon]).addTo(map).bindPopup(locationName).openPopup();
+    });
+</script>
 
 </body>
 </html>

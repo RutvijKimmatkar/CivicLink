@@ -1,38 +1,103 @@
-<!doctype html>
-<html xmlns:th="http://www.thymeleaf.org">
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="utf-8">
-    <title>Vendor Dashboard</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vendor Dashboard - CIVILINK</title>
+    <!-- Include Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { font-family: system-ui, Arial; padding: 20px; }
-        button { margin-left:8px; }
+        /* Apply a default font, like Inter */
+        body {
+            font-family: "Inter", sans-serif;
+        }
     </style>
 </head>
-<body>
-<h2>Welcome, <span th:text="${vendorName != null ? vendorName : (vendor != null ? vendor.name : 'Vendor')}">Vendor</span></h2>
-<p><a th:href="@{/vendor/logout}">Logout</a></p>
+<body class="min-h-screen bg-slate-50 text-slate-900 antialiased bg-[image:radial-gradient(theme(colors.slate.200)_1px,transparent_1px)] [background-size:16px_16px]">
 
-<h3>Assigned complaints</h3>
+<!-- --- Inline SVG Icons --- -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+    <symbol id="icon-logout" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line>
+    </symbol>
+    <symbol id="icon-chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="9 18 15 12 9 6"></polyline>
+    </symbol>
+    <symbol id="icon-inbox" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="21 8 21 16 3 16 3 8"></polyline><rect x="1" y="4" width="22" height="4"></rect><line x1="10" x2="14" y1="12" y2="12"></line>
+    </symbol>
+</svg>
 
-<div th:if="${complaints != null and !complaints.isEmpty()}">
-    <ul>
-        <li th:each="c : ${complaints}">
-            <strong th:text="${c.id}">1</strong> —
-            <span th:text="${c.category != null ? c.category : '-'}">CAT</span> —
-            <span th:text="${c.description == null ? ''
-                 : (c.description.length() > 120
-                     ? c.description.substring(0,120).concat('...')
-                     : c.description)}">desc</span>
-            <br/>
-            <small th:text="${c.createdAt != null ? #temporals.format(c.createdAt,'yyyy-MM-dd HH:mm') : '-'}">date</small>
-            <br/>
-            <a th:href="@{|/vendor/complaints/${c.id}|}">View</a>
-        </li>
-    </ul>
-</div>
+<!-- Header Section (Logged-In State) -->
+<header class="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/80 backdrop-blur-md">
+    <div class="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <a th:href="@{/vendor/dashboard}" class="flex items-center gap-2">
+            <img
+                    src="/civiclink.png"
+                    alt="CIVILINK Logo"
+                    class="h-8 w-auto"
+            />
+        </a>
 
-<div th:if="${complaints == null or complaints.isEmpty()}">
-    <p>No complaints assigned.</p>
-</div>
+        <div class="flex items-center gap-4">
+            <!-- Welcome message -->
+            <span class="hidden sm:inline text-sm font-medium text-slate-600">
+                Welcome, <span th:text="${vendorName != null ? vendorName : (vendor != null ? vendor.name : 'Vendor')}">Vendor</span>
+            </span>
+            <!-- Logout button -->
+            <a th:href="@{/vendor/logout}" class="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-slate-200 bg-white hover:bg-slate-100 hover:text-slate-900 h-10 px-4 py-2">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor"><use xlink:href="#icon-logout"></use></svg>
+                Logout
+            </a>
+        </div>
+    </div>
+</header>
+
+<!-- Main Content -->
+<main class="py-12">
+    <div class="container mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+
+        <h2 class="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl mb-8">
+            Assigned Complaints
+        </h2>
+
+        <!-- Complaints List -->
+        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white text-slate-950 shadow-sm">
+            <!-- If complaints exist -->
+            <div th:if="${complaints != null and !complaints.isEmpty()}">
+                <ul class="divide-y divide-slate-200">
+                    <li th:each="c : ${complaints}" class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-6 hover:bg-slate-50 transition-colors">
+                        <div class="flex-1">
+                            <p class="text-sm font-medium text-slate-600">
+                                <span class="font-bold text-slate-900" th:text="${c.category != null ? c.category : '-'}">CATEGORY</span>
+                                &bull;
+                                <span th:text="${c.createdAt != null ? #temporals.format(c.createdAt,'yyyy-MM-dd HH:mm') : '-'}">date</span>
+                            </p>
+                            <p class="mt-1 text-base text-slate-800"
+                               th:text="${c.description == null ? ''
+                                 : (c.description.length() > 120
+                                     ? c.description.substring(0,120).concat('...')
+                                     : c.description)}">
+                                Complaint description...
+                            </p>
+                        </div>
+                        <a th:href="@{|/vendor/complaints/${c.id}|}" class="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-slate-900 text-white hover:bg-slate-900/90 h-10 px-4 py-2 shadow-sm flex-shrink-0">
+                            View Details
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor"><use xlink:href="#icon-chevron-right"></use></svg>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- If no complaints -->
+            <div th:if="${complaints == null or complaints.isEmpty()}" class="p-12 text-center">
+                <svg class="mx-auto h-12 w-12 text-slate-400" fill="none" stroke="currentColor"><use xlink:href="#icon-inbox"></use></svg>
+                <h3 class="mt-2 text-lg font-medium text-slate-900">No complaints assigned</h3>
+                <p class="mt-1 text-sm text-slate-500">You currently have no complaints assigned to you.</p>
+            </div>
+        </div>
+    </div>
+</main>
+
 </body>
 </html>
