@@ -92,9 +92,26 @@
             <p class="text-base font-medium text-slate-900" th:text="${complaint != null && complaint.createdAt != null ? #temporals.format(complaint.createdAt, 'yyyy-MM-dd HH:mm') : '-'}">date</p>
         </div>
         <div class="sm:col-span-2">
-            <label class="block text-sm font-medium text-slate-500">Location</label>
-            <p class="text-base font-medium text-slate-900" th:text="${complaint != null && complaint.location != null ? complaint.location : '-'}">loc</p>
-        </div>
+            <div class="sm:col-span-2">
+                <label class="block text-sm font-medium text-slate-500">Location</label>
+                <p id="complaint-location" class="text-base font-medium text-slate-900"
+                   th:text="${complaint != null && complaint.location != null ? complaint.location : '-'}">loc</p>
+
+                <!-- Hidden lat/lng for the map -->
+                <p id="lat" th:text="${complaint != null ? complaint.latitude : ''}" hidden></p>
+                <p id="lon" th:text="${complaint != null ? complaint.longitude : ''}" hidden></p>
+                <a th:if="${complaint != null && complaint.latitude != null && complaint.longitude != null}"
+                   th:href="@{|https://www.google.com/maps?q=${complaint.latitude},${complaint.longitude}|}"
+                   target="_blank"
+                   class="text-sm text-blue-600 hover:underline mt-2 inline-block">
+                    Open in Google Maps
+                </a>
+
+                <!-- Map display -->
+                <div id="map" class="mt-3 rounded-md border border-slate-200"
+                     style="height: 300px;"></div>
+            </div>        </div>
+
         <div class="sm:col-span-2">
             <label class="block text-sm font-medium text-slate-500">Description</label>
             <p class="text-base font-medium text-slate-900" th:text="${complaint != null && complaint.description != null ? complaint.description : '-'}">desc</p>
@@ -153,6 +170,39 @@
     </div>
     </div>
 </main>
+
+<!-- Leaflet dependencies -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const latText = document.getElementById('lat')?.innerText.trim();
+        const lonText = document.getElementById('lon')?.innerText.trim();
+        const mapContainer = document.getElementById('map');
+        const locationName = document.getElementById('complaint-location')?.innerText || 'Unknown location';
+
+        // If no valid coordinates, don't render map
+        const lat = parseFloat(latText);
+        const lon = parseFloat(lonText);
+        if (isNaN(lat) || isNaN(lon) || !mapContainer) {
+            mapContainer.innerHTML = "<p class='text-sm text-slate-500 p-4'>No coordinates available for this complaint.</p>";
+            return;
+        }
+
+        // Initialize Leaflet map (read-only)
+        const map = L.map('map', { zoomControl: false, dragging: false, scrollWheelZoom: false })
+            .setView([lat, lon], 15);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Marker
+        L.marker([lat, lon]).addTo(map).bindPopup(locationName).openPopup();
+    });
+</script>
 
 </body>
 </html>
