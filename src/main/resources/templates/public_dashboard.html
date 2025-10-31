@@ -6,39 +6,69 @@
     <title>Public Dashboard — CIVILINK</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-    <style> #map { height: 420px; } .card { min-height: 64px; } </style>
-</head>
-<body class="bg-slate-50 text-slate-900">
+    <style>
+        body {
+            font-family: "Inter", sans-serif;
+        }
 
-<header class="bg-white border-b sticky top-0">
-    <div class="max-w-6xl mx-auto p-4 flex justify-between">
-        <h1 class="text-xl font-bold">CIVILINK — Public Dashboard</h1>
-        <a th:href="@{/}" class="text-sm text-slate-500">Home</a>
+        #map-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.15;
+            z-index: -1;
+        }
+
+        #map {
+            height: 420px;
+        }
+    </style>
+</head>
+
+<body class="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 text-slate-900 min-h-screen relative">
+
+<canvas id="map-canvas"></canvas>
+
+<header class="backdrop-blur bg-white/30 border-b border-white/40 sticky top-0 z-10 shadow-sm">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center gap-2">
+            <img src="/civiclink.png" alt="CIVILINK Logo" class="h-8 w-auto" />
+            <span class="text-xl md:text-2xl text-slate-500 font-medium hidden sm:inline">— Public Dashboard</span>
+        </div>
+        <a th:href="@{/}" class="text-sm text-slate-600 hover:text-slate-900 transition">Home</a>
     </div>
 </header>
 
-<main class="max-w-6xl mx-auto p-4 space-y-6">
+<main class="max-w-6xl mx-auto px-6 py-8 space-y-8 relative z-0">
 
     <section>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div th:each="entry : ${categorySummary}" class="card p-4 bg-white rounded shadow-sm border">
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            <div th:each="entry : ${categorySummary}"
+                 class="bg-white/80 hover:bg-white p-5 rounded-2xl shadow-sm hover:shadow-md border border-white/40 transition-all">
                 <div class="text-sm text-slate-500" th:text="${entry.key}">Category</div>
-                <div class="text-2xl font-semibold" th:text="${entry.value}">0</div>
+                <div class="text-3xl font-semibold text-slate-800" th:text="${entry.value}">0</div>
             </div>
         </div>
     </section>
 
     <section>
-        <div id="map" class="rounded border bg-white shadow-sm"></div>
+        <div id="map" class="rounded-2xl border border-white/50 bg-white/80 shadow-md overflow-hidden"></div>
     </section>
 
     <section>
-        <h2 class="text-lg font-semibold mb-3">Recent Complaints</h2>
+        <h2 class="text-xl font-semibold mb-4 text-slate-800">Recent Complaints</h2>
         <div id="recent-list" class="space-y-3">
-            <div th:each="c : ${initialComplaints}" class="bg-white p-4 rounded shadow-sm border">
-                <div class="text-xs text-slate-500" th:text="${#temporals.format(c.createdAt,'yyyy-MM-dd HH:mm')}">time</div>
-                <div class="font-medium" th:text="${c.category}">Category</div>
-                <div class="text-sm text-slate-600" th:text="${c.description != null && c.description.length() > 120 ? c.description.substring(0,120).concat('...') : c.description}">desc</div>
+            <div th:each="c : ${initialComplaints}"
+                 class="bg-white/80 p-5 rounded-2xl shadow-sm hover:shadow-md border border-white/50 transition-all">
+                <div class="text-xs text-slate-500 mb-1"
+                     th:text="${#temporals.format(c.createdAt,'yyyy-MM-dd HH:mm')}">time</div>
+                <div class="font-medium text-slate-800" th:text="${c.category}">Category</div>
+                <div class="text-sm text-slate-600"
+                     th:text="${c.description != null && c.description.length() > 120 ? c.description.substring(0,120).concat('...') : c.description}">
+                    desc
+                </div>
             </div>
         </div>
     </section>
@@ -48,20 +78,94 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', async () => {
-        const map = L.map('map').setView([19.2183,72.9781],14);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19, attribution:'© OpenStreetMap'}).addTo(map);
+        const map = L.map('map').setView([19.2183, 72.9781], 14);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
 
-        // fetch public complaints json
         try {
             const res = await fetch('/public/complaints.json?limit=100');
             const complaints = await res.json();
             complaints.forEach(c => {
                 if (!c.latitude || !c.longitude) return;
-                const popup = `<b>${c.category}</b><br/>${(c.description||'').substring(0,120)}<br/><small>${new Date(c.createdAt).toLocaleString()}</small>`;
+                const popup = `
+            <b>${c.category}</b><br/>
+            ${(c.description || '').substring(0, 120)}<br/>
+            <small>${new Date(c.createdAt).toLocaleString()}</small>`;
+                // MODIFIED: Removed stray characters
                 L.marker([c.latitude, c.longitude]).addTo(map).bindPopup(popup);
             });
         } catch (err) {
             console.error('Failed to load public complaints', err);
+        }
+
+        // Animated background
+        const canvas = document.getElementById('map-canvas');
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            // MODIFIED: Removed stray 'Boolean(canvas)'
+            function resizeCanvas() {
+                canvas.width = canvas.offsetWidth;
+                canvas.height = canvas.offsetHeight;
+            }
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            const streets = [];
+            const numStreets = 15;
+            const offset = { x: 0, y: 0 };
+
+            for (let i = 0; i < numStreets; i++) {
+                streets.push({ type: 'horizontal', y: (canvas.height / numStreets) * i, width: Math.random() > 0.7 ? 3 : 1.5 });
+                streets.push({ type: 'vertical', x: (canvas.width / numStreets) * i, width: Math.random() > 0.7 ? 3 : 1.5 });
+            }
+
+            const landmarks = [];
+            for (let i = 0; i < 8; i++) {
+                landmarks.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    radius: Math.random() * 8 + 4,
+                    pulsePhase: Math.random() * Math.PI * 2
+                    // MODIFIED: Removed stray 'Boolean(canvas)'
+                });
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                offset.x = Math.sin(Date.now() / 2000) * 20;
+                offset.y = Math.cos(Date.now() / 2500) * 20;
+                ctx.strokeStyle = '#94a3b8';
+                ctx.fillStyle = '#94a3b8';
+
+                streets.forEach(street => {
+                    ctx.lineWidth = street.width;
+                    ctx.beginPath();
+                    if (street.type === 'horizontal') {
+                        // MODIFIED: Removed stray characters
+                        ctx.moveTo(0, street.y + offset.y);
+                        ctx.lineTo(canvas.width, street.y + offset.y);
+                    } else {
+                        ctx.moveTo(street.x + offset.x, 0);
+                        ctx.lineTo(street.x + offset.x, canvas.height);
+                    }
+                    ctx.stroke();
+                });
+
+                landmarks.forEach(landmark => {
+                    // MODIFIED: Removed stray characters
+                    const pulse = Math.sin(Date.now() / 500 + landmark.pulsePhase) * 0.3 + 0.7;
+                    ctx.globalAlpha = pulse * 0.6;
+                    ctx.beginPath();
+                    ctx.arc(landmark.x + offset.x, landmark.y + offset.y, landmark.radius, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                });
+
+                requestAnimationFrame(animate);
+            }
+            animate();
         }
     });
 </script>

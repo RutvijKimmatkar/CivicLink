@@ -4,43 +4,38 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin Dashboard - CIVILINK</title>
-    <!-- Include Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Apply a default font, like Inter */
         body {
             font-family: "Inter", sans-serif;
         }
     </style>
 </head>
-<body class="min-h-screen bg-slate-50 text-slate-900 antialiased bg-[image:radial-gradient(theme(colors.slate.200)_1px,transparent_1px)] [background-size:16px_16px]">
 
-<!-- --- Inline SVG Icons --- -->
+<body class="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 text-slate-900 antialiased">
+
+<!-- Inline SVG Icons -->
 <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
     <symbol id="icon-logout" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line>
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+        <polyline points="16 17 21 12 16 7"></polyline>
+        <line x1="21" x2="9" y1="12" y2="12"></line>
     </symbol>
 </svg>
 
-<!-- Header Section (Admin State) -->
-<header class="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/80 backdrop-blur-md">
+<!-- Header -->
+<header class="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/30 backdrop-blur-md">
     <div class="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <a th:href="@{/admin/complaints}" class="flex items-center gap-2">
-            <img
-                    src="/civiclink.png"
-                    alt="CIVILINK Logo"
-                    class="h-8 w-auto"
-            />
+            <img src="/civiclink.png" alt="CIVILINK Logo" class="h-8 w-auto" />
         </a>
 
-        <div class_models="flex items-center gap-4">
-            <!-- Admin Welcome -->
-            <span th:if="${adminName != null}" class="hidden sm:inline text-sm font-medium text-slate-600">
-                Admin: <strong th:text="${adminName}">User</strong>
-            </span>
+        <div class="flex items-center gap-4">
+      <span th:if="${adminName != null}" class="hidden sm:inline text-sm font-medium text-slate-600">
+        Admin: <strong th:text="${adminName}">User</strong>
+      </span>
 
-            <!-- Logout button -->
-            <a th:href="@{/admin/logout}" class="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-slate-200 bg-white hover:bg-slate-100 hover:text-slate-900 h-10 px-4 py-2">
+            <a th:href="@{/admin/logout}" class="inline-flex items-center justify-center gap-2 rounded-md border border-slate-200 bg-white/80 text-sm font-medium shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 hover:bg-slate-100 hover:text-slate-900 h-10 px-4 py-2">
                 <svg class="h-4 w-4" fill="none" stroke="currentColor"><use xlink:href="#icon-logout"></use></svg>
                 Logout
             </a>
@@ -57,82 +52,56 @@
         </h2>
 
         <!-- Complaints Table Card -->
-        <div class="rounded-lg border border-slate-200 bg-white text-slate-950 shadow-sm overflow-hidden">
-            <!-- Table Container -->
-            <div class="overflow-x-auto">
+        <div class="rounded-2xl border border-slate-200 bg-white/80 backdrop-blur-sm shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300">
 
-                <!-- Table (shown if complaints exist) -->
+            <div class="overflow-x-auto">
+                <!-- Table -->
                 <table th:if="${complaints != null and complaints.size() > 0}" class="w-full min-w-full divide-y divide-slate-200">
                     <thead class="bg-slate-50">
                     <tr>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">#</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">User</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Category</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Description</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Location</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Created</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Status</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Vendor</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">#</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">User</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Category</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Description</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Location</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Created</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Vendor</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
                     </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-slate-200">
                     <tr th:each="c, iterStat : ${complaints}" class="hover:bg-slate-50">
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900" th:text="${iterStat.index + 1}">1</td>
-
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600" th:text="${c.user != null ? (c.user.username != null ? c.user.username : c.user.email) : '—'}">user</td>
-
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600" th:text="${c.category != null ? c.category : '-'}">CATEGORY</td>
-
-                        <td class="px-6 py-4 max-w-xs truncate text-sm text-slate-600" th:title="${c.description != null ? c.description : '-'}" th:text="${c.description != null ? c.description : '-'}">desc</td>
-
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600" th:text="${c.location != null ? c.location : '-'}">loc</td>
-
-                        <td class-="px-6 py-4 whitespace-nowrap text-sm text-slate-600" th:text="${c.createdAt != null ? #temporals.format(c.createdAt, 'yyyy-MM-dd HH:mm') : '-'}">date</td>
-
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600" th:text="${c.user?.username ?: c.user?.email ?: '—'}">user</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600" th:text="${c.category ?: '-'}">CATEGORY</td>
+                        <td class="px-6 py-4 max-w-xs truncate text-sm text-slate-600" th:title="${c.description ?: '-'}" th:text="${c.description ?: '-'}">desc</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600" th:text="${c.location ?: '-'}">loc</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600" th:text="${c.createdAt != null ? #temporals.format(c.createdAt,'yyyy-MM-dd HH:mm') : '-'}">date</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm">
-                            <!-- Styled Status Tags -- FIXED -->
-                            <span th:text="${c.status != null ? c.status : 'UNKNOWN'}"
-                                  class="px-2.5 py-0.5 rounded-full text-xs font-medium"
-                                  th:classappend="${c.status == 'SUBMITTED' ? 'bg-yellow-100 text-yellow-800' :
-                                                       c.status == 'IN_PROGRESS' ? 'bg-blue-100 text-blue-800' :
-                                                       c.status == 'COMPLETED' ? 'bg-green-100 text-green-800' :
-                                                       c.status == 'REJECTED' ? 'bg-red-100 text-red-800' : 'bg-slate-100 text-slate-800'}">
-                                    STATUS
-                                </span>
+                <span th:text="${c.status ?: 'UNKNOWN'}"
+                      class="px-2.5 py-0.5 rounded-full text-xs font-medium"
+                      th:classappend="${c.status == 'SUBMITTED' ? 'bg-yellow-100 text-yellow-800' :
+                                       c.status == 'IN_PROGRESS' ? 'bg-blue-100 text-blue-800' :
+                                       c.status == 'COMPLETED' ? 'bg-green-100 text-green-800' :
+                                       c.status == 'REJECTED' ? 'bg-red-100 text-red-800' : 'bg-slate-100 text-slate-800'}">
+                  STATUS
+                </span>
                         </td>
-
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600" th:text="${c.assignedVendorId != null ? c.assignedVendorId : '-'}">vendor</td>
-
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600" th:text="${c.assignedVendorId ?: '-'}">vendor</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium flex items-center gap-x-3">
-                            <!-- View (GET) -->
                             <a th:href="@{|/admin/complaints/${c.id}|}" class="text-indigo-600 hover:text-indigo-900">View</a>
-
-                            <!-- Assign (GET to show assign form) -->
                             <a th:href="@{|/admin/complaints/${c.id}/assign|}" class="text-indigo-600 hover:text-indigo-900">Assign</a>
-
-                            <!-- Action Buttons Styled as Links -->
                             <form th:action="@{|/admin/complaints/${c.id}/reject|}" method="post" class="inline">
-                                <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                <input th:if="${_csrf}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                                 <button type="submit" class="text-red-600 hover:text-red-900 bg-transparent border-none p-0 cursor-pointer">Reject</button>
-                                This text is outside the code block.
                             </form>
 
-                            <form th:action="@{|/admin/complaints/${c.id}/inprogress|}" method="post" class="inline">
-                                <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                                <button type="submit" class="text-blue-600 hover:text-blue-900 bg-transparent border-none p-0 cursor-pointer">Approve</button>
-                            </form>
-
-                            <form th:action="@{|/admin/complaints/${c.id}/complete|}" method="post" class="inline">
-                                <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                                <button type="submit" class="text-green-600 hover:text-green-900 bg-transparent border-none p-0 cursor-pointer">Complete</button>
-                            </form>
                         </td>
                     </tr>
                     </tbody>
                 </table>
 
-                <!-- Message for no complaints -->
                 <div th:if="${complaints == null or complaints.size() == 0}" class="p-6">
                     <p class="text-center text-slate-600">No complaints found.</p>
                 </div>
@@ -144,4 +113,3 @@
 
 </body>
 </html>
-

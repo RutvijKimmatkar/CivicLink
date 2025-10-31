@@ -23,6 +23,14 @@ public class User {
     @Column(name = "u_password", nullable = false)
     private String password;
 
+    // new fields in User google login
+    @Column(unique = true)
+    private String googleId;
+
+    private String pictureUrl;
+
+    private Boolean emailVerified = false;
+
     public User() {}
 
     public User(String username, String email, String phoneNumber, String password) {
@@ -30,6 +38,7 @@ public class User {
         this.email = email;
         this.phoneNumber = phoneNumber;
         this.password = password;
+
     }
 
     // getters & setters
@@ -47,4 +56,14 @@ public class User {
 
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
+
+    // google
+    public String getGoogleId() { return googleId; }
+    public void setGoogleId(String googleId) { this.googleId = googleId; }
+
+    public String getPictureUrl() { return pictureUrl; }
+    public void setPictureUrl(String pictureUrl) { this.pictureUrl = pictureUrl; }
+
+    public Boolean getEmailVerified() { return emailVerified; }
+    public void setEmailVerified(Boolean emailVerified) { this.emailVerified = emailVerified; }
 }
